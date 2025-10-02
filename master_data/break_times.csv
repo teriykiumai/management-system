@@ -1,0 +1,2 @@
+break_time_id,user_id,department_id,start_time,end_time,description
+1,,,12:00:00,13:00:00,全社共通昼休憩
