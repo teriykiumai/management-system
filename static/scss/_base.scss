@@ -1,0 +1,26 @@
+@import 'variables';
+
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: $base-font-family;
+    font-size: $base-font-size;
+    color: $text-color;
+    background-color: $background-color;
+    line-height: 1.6;
+}
+
+h2, h3 {
+    color: $primary-color;
+}
+
+a {
+    color: $secondary-color;
+    text-decoration: none;
+    &:hover {
+        text-decoration: underline;
+    }
+}
