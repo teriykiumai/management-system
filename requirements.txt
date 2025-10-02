@@ -1,0 +1,5 @@
+django
+django-environ
+django-widget-tweaks
+python-dateutil
+msal
