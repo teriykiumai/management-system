@@ -14,9 +14,20 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+# management_system/urls.py
+
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include 
+from django.conf import settings 
+from leaves import views as leaves_views 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('leaves/', include('leaves.urls')), # leavesアプリのURLをインクルード
 ]
+
+# DEBUGモードがTrueの場合のみ、開発用のログインURLを追加
+if settings.DEBUG:
+    urlpatterns += [
+        path('dev-login/', leaves_views.dev_login_view, name='dev_login'),
+    ]

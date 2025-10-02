@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block title %}開発者用ログイン{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>開発者用ログイン</h2>
+    <p>（この画面は settings.DEBUG が True の場合のみ表示されます）</p>
+    <p>ログインしたいユーザーを選択してください。</p>
+    <form method="post" action="{% url 'dev_login' %}">
+        {% csrf_token %}
+        <select name="user_id" required>
+            <option value="">-- ユーザーを選択 --</option>
+            {% for user in users %}
+                <option value="{{ user.pk }}">{{ user }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit">ログイン</button>
+    </form>
+</div>
+{% endblock %}
