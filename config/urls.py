@@ -33,4 +33,5 @@ urlpatterns = [
 if settings.DEBUG:
     urlpatterns += [
         path('dev-login/', leaves_views.dev_login_view, name='dev_login'),
+        path('logout/', leaves_views.logout_view, name='logout'),
     ]

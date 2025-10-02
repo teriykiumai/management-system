@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth import login, get_user_model
+from django.contrib.auth import login, get_user_model, logout
 from django.conf import settings
 from django.http import Http404
 from django.contrib.auth.decorators import login_required
@@ -69,3 +69,8 @@ def dashboard_view(request):
         'pending_approvals_count': pending_approvals_count,
     }
     return render(request, 'leaves/dashboard.html', context)
+
+def logout_view(request):
+    """ログアウト処理ビュー"""
+    logout(request)
+    return redirect('dev_login') # ログアウト後は開発用ログイン画面に遷移
