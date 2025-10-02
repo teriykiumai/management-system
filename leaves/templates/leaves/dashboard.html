@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}ダッシュボード{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>{{ user.last_name }} {{ user.first_name }}さんのダッシュボード</h2>
+
+    {% if pending_approvals_count > 0 %}
+    <div class="card alert">
+        <h3>承認待ちタスク</h3>
+        <p>あなた宛に <a href="#">{{ pending_approvals_count }}件</a> の承認待ち申請があります。</p>
+    </div>
+    {% endif %}
+
+    <div class="card">
+        <h3>休暇残高 ({{ balance.year|default:"N/A" }}年度)</h3>
+        {% if balance %}
+            {# モデルプロパティを直接使用 #}
+            <p class="balance-large">{{ balance.remaining_days }}日 と {{ balance.remaining_minutes_part }}分</p>
+            <hr>
+            <ul>
+                <li>前年度繰越: {{ balance.carried_over_days }}日 と {{ balance.carried_over_minutes_part }}分</li>
+                <li>本年度付与: {{ balance.granted_days }}日 と {{ balance.granted_minutes_part }}分</li>
+                <li>利用済み: {{ balance.used_days }}日 と {{ balance.used_minutes_part }}分</li>
+            </ul>
+        {% else %}
+            <p>休暇残高の情報がありません。</p>
+        {% endif %}
+    </div>
+
+    <div class="card">
+        <h3>申請状況サマリー ({{ balance.year|default:"N/A" }}年度)</h3>
+        <ul>
+            {# viewから渡されたリストをループ #}
+            {% for item in summary_list %}
+                <li>{{ item.display }}: {{ item.count }}件</li>
+            {% empty %}
+                <li>申請履歴がありません。</li>
+            {% endfor %}
+        </ul>
+        <a href="#">休暇を申請する</a> | <a href="#">申請履歴を見る</a>
+    </div>
+
+</div>
+{% endblock %}

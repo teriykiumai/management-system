@@ -1,0 +1,52 @@
+@import 'variables';
+
+.container {
+    max-width: $container-max-width;
+    margin: 0 auto;
+    padding: 0 ($spacing-unit * 1.5);
+    }
+
+.navbar {
+    background-color: $white;
+    padding: $spacing-unit $spacing-unit * 1.5;
+    border-bottom: 1px solid $border-color;
+    box-shadow: $box-shadow;
+
+    .container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0;
+    }
+
+    .navbar-brand {
+        font-weight: bold;
+        font-size: 1.25rem;
+        color: $primary-color;
+        &:hover { text-decoration: none; }
+    }
+
+    .navbar-menu {
+        display: flex;
+        align-items: center;
+        gap: $spacing-unit * 1.5;
+    }
+    
+    .navbar-item {
+        color: $text-color;
+        &.user-name {
+        color: #666;
+        }
+    }
+}
+
+main {
+    padding: ($spacing-unit * 2) 0;
+}
+
+footer {
+    text-align: center;
+    padding: ($spacing-unit * 2) 0;
+    color: #888;
+    font-size: 0.9rem;
+}

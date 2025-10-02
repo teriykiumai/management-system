@@ -1,0 +1,119 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 16px;
+  color: #333;
+  background-color: #f4f7fa;
+  line-height: 1.6;
+}
+
+h2, h3 {
+  color: #005A9C;
+}
+
+a {
+  color: #4A90E2;
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+
+.container {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+.navbar {
+  background-color: #fff;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #ddd;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+.navbar .container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0;
+}
+.navbar .navbar-brand {
+  font-weight: bold;
+  font-size: 1.25rem;
+  color: #005A9C;
+}
+.navbar .navbar-brand:hover {
+  text-decoration: none;
+}
+.navbar .navbar-menu {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+.navbar .navbar-item {
+  color: #333;
+}
+.navbar .navbar-item.user-name {
+  color: #666;
+}
+
+main {
+  padding: 2rem 0;
+}
+
+footer {
+  text-align: center;
+  padding: 2rem 0;
+  color: #888;
+  font-size: 0.9rem;
+}
+
+button, a.button {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  border: 1px solid #005A9C;
+  border-radius: 4px;
+  background-color: #005A9C;
+  color: #fff;
+  font-size: 16px;
+  cursor: pointer;
+  text-align: center;
+  transition: background-color 0.2s;
+}
+button:hover, a.button:hover {
+  background-color: rgb(0, 60.5769230769, 105);
+  text-decoration: none;
+  color: #fff;
+}
+
+.card {
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+}
+.card h3 {
+  margin-top: 0;
+  border-bottom: 2px solid #f4f7fa;
+  padding-bottom: 0.5rem;
+}
+.card ul {
+  padding-left: 1.5rem;
+  margin: 0;
+}
+.card.alert {
+  border-left: 5px solid #e44d26;
+}
+.card .balance-large {
+  font-size: 2rem;
+  font-weight: bold;
+  text-align: center;
+  color: #005A9C;
+  margin: 1rem 0;
+}/*# sourceMappingURL=main.css.map */

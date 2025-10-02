@@ -1,0 +1,34 @@
+@import 'variables';
+
+.card {
+    background-color: $white;
+    border: 1px solid $border-color;
+    border-radius: $border-radius;
+    box-shadow: $box-shadow;
+    margin-bottom: $spacing-unit * 2;
+    padding: $spacing-unit * 1.5;
+
+    h3 {
+        margin-top: 0;
+        border-bottom: 2px solid $background-color;
+        padding-bottom: $spacing-unit * 0.5;
+    }
+
+    ul {
+        padding-left: $spacing-unit * 1.5;
+        margin: 0;
+    }
+
+    // アラート用のカード
+    &.alert {
+        border-left: 5px solid $alert-color;
+    }
+    
+    .balance-large {
+        font-size: 2rem;
+        font-weight: bold;
+        text-align: center;
+        color: $primary-color;
+        margin: $spacing-unit 0;
+    }
+}
