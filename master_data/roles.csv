@@ -1,0 +1,12 @@
+role_id,role_name,role_level,deputy_role_id,view_scope,is_approval_endpoint,approval_order
+1,一般社員,10,,TEAM,False,
+2,チーフ (TS),20,,TEAM,False,
+3,チームリーダー (TL),30,2,TEAM,False,1
+4,エキスパート (EP),40,,GROUP,False,
+5,グループ長 (GL),50,4,GROUP,False,2
+6,部長,60,7,DEPARTMENT,False,3
+7,次長 (SEP),70,,DEPARTMENT,False,
+8,業務部・勤怠管理担当,80,9,ALL,True,
+9,幹部 (常務),100,10,ALL,True,
+10,幹部 (専務),110,11,ALL,True,
+11,幹部 (社長),120,,ALL,True,
