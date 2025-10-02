@@ -19,11 +19,14 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include 
 from django.conf import settings 
+from django.views.generic import RedirectView
+
 from leaves import views as leaves_views 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('leaves/', include('leaves.urls')), # leavesアプリのURLをインクルード
+    path('', RedirectView.as_view(pattern_name='leaves:dashboard'), name='home'),
 ]
 
 # DEBUGモードがTrueの場合のみ、開発用のログインURLを追加

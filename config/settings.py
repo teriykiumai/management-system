@@ -129,3 +129,10 @@ AUTH_USER_MODEL = 'leaves.User'
 STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
+
+LOGIN_URL = 'dev_login' # 開発中はdev_loginをログインページとする
+
+# ログイン成功後のデフォルトの遷移先
+LOGIN_REDIRECT_URL = 'leaves:dashboard' 
+# ログアウト成功後のデフォルトの遷移先
+# LOGOUT_REDIRECT_URL = 'leaves:dashboard'
