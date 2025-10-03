@@ -9,7 +9,7 @@
     {% if pending_approvals_count > 0 %}
     <div class="card alert">
         <h3>承認待ちタスク</h3>
-        <p>あなた宛に <a href="#">{{ pending_approvals_count }}件</a> の承認待ち申請があります。</p>
+        <p>あなた宛に <a href="{% url 'leaves:approval_list' %}">{{ pending_approvals_count }}件</a> の承認待ち申請があります。</p>
     </div>
     {% endif %}
 

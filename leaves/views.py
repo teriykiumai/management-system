@@ -2,7 +2,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import login, get_user_model, logout
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.http import Http404
 from django.db.models import Count
 
@@ -10,6 +10,7 @@ from .forms import ApplicationForm
 from .models import LeaveBalance, Application
 from .services.fiscal_year import get_current_fiscal_year
 from .services.application_service import create_application, AssignmentError
+from .services.approval_service import process_approval_action, InvalidActionError
 
 
 User = get_user_model()
@@ -96,3 +97,44 @@ def application_create_view(request):
         form = ApplicationForm()
 
     return render(request, 'leaves/application_form.html', {'form': form})
+
+@login_required
+def approval_task_list_view(request):
+    """承認待ちタスクの一覧ビュー"""
+    pending_applications = Application.objects.filter(
+        current_approver=request.user,
+        status=Application.Status.APPLYING
+    ).order_by('created_at')
+    
+    context = {
+        'pending_applications': pending_applications,
+    }
+    return render(request, 'leaves/approval_task_list.html', context)
+
+@login_required
+def application_detail_view(request, pk: int):
+    """申請詳細ビュー"""
+    application = get_object_or_404(Application, pk=pk)
+    histories = application.approval_histories.all().order_by('timestamp')
+
+    if request.method == 'POST':
+        action = request.POST.get("action")
+        comment = request.POST.get("comment", "")
+
+        # 差し戻し・却下の場合はコメントが必須
+        if action in ['remand', 'reject'] and not comment:
+            messages.error(request, "差し戻し、または却下する場合はコメントが必須です。")
+        else:
+            try:
+                process_approval_action(application, request.user, action, comment)
+                messages.success(request, f"申請ID:{application.pk}を{action}しました。")
+                return redirect('leaves:approval_list')
+            except InvalidActionError as e:
+                messages.error(request, str(e))
+
+    context = {
+        'application': application,
+        'histories': histories,
+        'is_current_approver': application.current_approver == request.user,
+    }
+    return render(request, 'leaves/application_detail.html', context)
