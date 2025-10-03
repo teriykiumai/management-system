@@ -1,12 +1,15 @@
-from django.shortcuts import render, redirect
-from django.contrib.auth import login, get_user_model, logout
 from django.conf import settings
-from django.http import Http404
+from django.contrib import messages
+from django.contrib.auth import login, get_user_model, logout
 from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect
+from django.http import Http404
 from django.db.models import Count
 
+from .forms import ApplicationForm
 from .models import LeaveBalance, Application
 from .services.fiscal_year import get_current_fiscal_year
+from .services.application_service import create_application, AssignmentError
 
 
 User = get_user_model()
@@ -74,3 +77,22 @@ def logout_view(request):
     """ログアウト処理ビュー"""
     logout(request)
     return redirect('dev_login') # ログアウト後は開発用ログイン画面に遷移
+
+@login_required
+def application_create_view(request):
+    """休暇申請の作成ビュー"""
+    if request.method == 'POST':
+        form = ApplicationForm(request.POST)
+        if form.is_valid():
+            try:
+                # ビジネスロジックをサービス関数に委譲
+                create_application(applicant=request.user, form_data=form.cleaned_data)
+                messages.success(request, '休暇申請を送信しました。')
+                return redirect('leaves:dashboard')
+            except AssignmentError as e:
+                # サービスから返されたエラーをユーザーに表示
+                messages.error(request, str(e))
+    else:
+        form = ApplicationForm()
+
+    return render(request, 'leaves/application_form.html', {'form': form})
