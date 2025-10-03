@@ -1,0 +1,45 @@
+// static/scss/_application_form.scss
+
+@import 'variables';
+
+// 時間休の各行のレイアウト
+.time-slot-row {
+    display: flex;
+    align-items: center;
+    gap: $spacing-unit * 0.5; // 各要素間のスペース
+    margin-bottom: $spacing-unit;
+
+    // 時間選択<select>の幅を調整
+    select {
+        flex: 1; // 残りのスペースを均等に分ける
+        min-width: 100px;
+        padding: 0.5rem; // 少し小さめに
+    }
+
+    span {
+        font-weight: bold;
+    }
+}
+
+// 小さめのボタン（追加・削除ボタン用）
+.button-small, .remove-slot-btn {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.9rem;
+    background-color: lighten($text-color, 30%);
+    border-color: lighten($text-color, 30%);
+
+    &:hover {
+        background-color: lighten($text-color, 20%);
+        border-color: lighten($text-color, 20%);
+    }
+}
+
+// 削除ボタンは少し目立たないように
+.remove-slot-btn {
+    background-color: $alert-color;
+    border-color: $border-color;
+    &:hover {
+        background-color: darken($alert-color, 10%);
+        border-color: darken($border-color, 10%);
+    }
+}

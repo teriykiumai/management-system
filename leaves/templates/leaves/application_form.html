@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static %} {# staticタグを使えるようにloadしておく #}
 
 {% block title %}休暇申請{% endblock %}
 
@@ -6,13 +7,47 @@
 <div class="container">
     <div class="card">
         <h3>休暇申請フォーム</h3>
-        <form method="post">
+        <form method="post" id="applicationForm">
             {% csrf_token %}
             
-            {{ form.as_p }}
+            {# 休暇種別 #}
+            <p>
+                <label for="{{ form.leave_type.id_for_label }}">{{ form.leave_type.label }}</label>
+                {{ form.leave_type }}
+            </p>
+
+            {# 開始日 #}
+            <p>
+                <label for="{{ form.start_date.id_for_label }}">{{ form.start_date.label }}</label>
+                {{ form.start_date }}
+            </p>
+
+            {# 終了日 (JavaScriptで表示/非表示を切り替える) #}
+            <p id="endDateField">
+                <label for="{{ form.end_date.id_for_label }}">{{ form.end_date.label }}</label>
+                {{ form.end_date }}
+            </p>
+
+            {# 時間休用の入力エリア (普段は非表示) #}
+            <div id="timeLeaveSlots" style="display: none;">
+                <h4>時間休の時間帯</h4>
+                <div id="timeSlotsContainer">
+                    </div>
+                <button type="button" id="addTimeSlot" class="button-small">時間帯を追加</button>
+            </div>
+
+            {# 申請理由 #}
+            <p>
+                <label for="{{ form.reason.id_for_label }}">{{ form.reason.label }}</label>
+                {{ form.reason }}
+            </p>
 
             <button type="submit">申請する</button>
         </form>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/application_form.js' %}"></script>
 {% endblock %}

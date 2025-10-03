@@ -207,4 +207,39 @@ table tbody tr {
 }
 table tbody tr:hover {
   background-color: rgb(251.0125, 252.1, 253.1875);
+}
+
+.time-slot-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+.time-slot-row select {
+  flex: 1;
+  min-width: 100px;
+  padding: 0.5rem;
+}
+.time-slot-row span {
+  font-weight: bold;
+}
+
+.button-small, .remove-slot-btn {
+  padding: 0.4rem 0.8rem;
+  font-size: 0.9rem;
+  background-color: rgb(0, 127.5, 255);
+  border-color: rgb(0, 127.5, 255);
+}
+.button-small:hover, .remove-slot-btn:hover {
+  background-color: #0066cc;
+  border-color: #0066cc;
+}
+
+.remove-slot-btn {
+  background-color: #e44d26;
+  border-color: #e0e6ed;
+}
+.remove-slot-btn:hover {
+  background-color: rgb(191.2090163934, 58.1557377049, 23.7909836066);
+  border-color: rgb(191.7346938776, 203.9795918367, 218.2653061224);
 }/*# sourceMappingURL=main.css.map */
