@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}申請詳細 (ID: {{ application.pk }}){% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="card">
+        <h3>申請詳細</h3>
+        <p><strong>申請者:</strong> {{ application.applicant }}</p>
+        <p><strong>休暇種別:</strong> {{ application.get_leave_type_display }}</p>
+        <p><strong>期間:</strong> {{ application.start_date }} ~ {{ application.end_date }}</p>
+        <p><strong>理由:</strong> {{ application.reason|linebreaksbr }}</p>
+        <p><strong>ステータス:</strong> {{ application.get_status_display }}</p>
+    </div>
+
+    <div class="card">
+        <h3>承認履歴</h3>
+        <ul>
+            {% for history in histories %}
+                <li>{{ history.timestamp|date:"Y-m-d H:i" }} - {{ history.approver }} - {{ history.get_action_display }} - {{ history.comment }}</li>
+            {% empty %}
+                <li>履歴はありません。</li>
+            {% endfor %}
+        </ul>
+    </div>
+    
+    {% if is_current_approver %}
+    <div class="card">
+        <h3>アクション</h3>
+        <form method="post">
+            {% csrf_token %}
+            <div>
+                <label for="comment">コメント（差し戻し・却下の場合は必須）:</label>
+                <textarea name="comment" id="comment" rows="3"></textarea>
+            </div>
+            <br>
+            <button type="submit" name="action" value="approve">承認</button>
+            <button type="submit" name="action" value="remand">差し戻し</button>
+            <button type="submit" name="action" value="reject">却下</button>
+        </form>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

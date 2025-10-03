@@ -1,0 +1,32 @@
+@import 'variables';
+
+.messages {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 $spacing-unit * 1.5 0;
+
+    .message {
+        padding: $spacing-unit;
+        border-radius: $border-radius;
+        border: 1px solid;
+        margin-bottom: $spacing-unit;
+
+        &.success {
+        background-color: #e6f4ea;
+        border-color: #4caf50;
+        color: #2e7d32;
+        }
+
+        &.error {
+        background-color: #fce8e6;
+        border-color: #e57373;
+        color: #c62828;
+        }
+
+    &.info {
+        background-color: #e3f2fd;
+        border-color: #64b5f6;
+        color: #1565c0;
+        }
+    }
+}

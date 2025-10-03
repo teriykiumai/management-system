@@ -126,4 +126,85 @@ button:hover, a.button:hover {
   text-align: center;
   color: #336699;
   margin: 1rem 0;
+}
+
+label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+.form-control,
+textarea[name=comment] {
+  width: 100%;
+  padding: 0.75rem;
+  font-size: 1rem;
+  border: 1px solid #e0e6ed;
+  border-radius: 4px;
+  background-color: #fff;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.form-control:focus,
+textarea[name=comment]:focus {
+  outline: none;
+  border-color: #336699;
+  box-shadow: 0 0 0 3px rgba(51, 102, 153, 0.2);
+}
+
+textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+form p {
+  margin-bottom: 1.5rem;
+}
+
+.messages {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1.5rem 0;
+}
+.messages .message {
+  padding: 1rem;
+  border-radius: 4px;
+  border: 1px solid;
+  margin-bottom: 1rem;
+}
+.messages .message.success {
+  background-color: #e6f4ea;
+  border-color: #4caf50;
+  color: #2e7d32;
+}
+.messages .message.error {
+  background-color: #fce8e6;
+  border-color: #e57373;
+  color: #c62828;
+}
+.messages .message.info {
+  background-color: #e3f2fd;
+  border-color: #64b5f6;
+  color: #1565c0;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+table thead {
+  background-color: rgb(251.0125, 252.1, 253.1875);
+  border-bottom: 2px solid #e0e6ed;
+}
+table th, table td {
+  padding: 0.75rem;
+  text-align: left;
+  vertical-align: middle;
+}
+table tbody tr {
+  border-bottom: 1px solid #e0e6ed;
+  transition: background-color 0.2s;
+}
+table tbody tr:hover {
+  background-color: rgb(251.0125, 252.1, 253.1875);
 }/*# sourceMappingURL=main.css.map */

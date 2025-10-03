@@ -1,0 +1,35 @@
+@import 'variables';
+
+label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+// フォームで使っている .form-control クラスのスタイル
+.form-control,
+textarea[name="comment"] { // 申請詳細画面のコメント欄にも適用
+    width: 100%;
+    padding: 0.75rem;
+    font-size: 1rem;
+    border: 1px solid $border-color;
+    border-radius: $border-radius;
+    background-color: $white;
+    transition: border-color 0.2s, box-shadow 0.2s;
+
+    &:focus {
+        outline: none;
+        border-color: $primary-color;
+        box-shadow: 0 0 0 3px rgba($primary-color, 0.2);
+    }
+}
+
+textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+// フォームの各項目間に余白を設ける
+form p {
+    margin-bottom: $spacing-unit * 1.5;
+}
