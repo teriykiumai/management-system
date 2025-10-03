@@ -1,5 +1,7 @@
 from django.contrib.auth import get_user_model
-from leaves.models import Application, Assignment, ApprovalHistory
+
+from leaves.models import Application, Assignment, ApprovalHistory, User
+from .approval_route_service import generate_approval_route
 
 User = get_user_model()
 
@@ -18,16 +20,28 @@ def create_application(applicant: User, form_data: dict) -> Application:
     Raises:
         AssignmentError: ユーザーの主務の所属が見つからない場合.
     """
-    # 1. 申請者の主務の所属情報を取得
     try:
         primary_assignment = Assignment.objects.get(user=applicant, is_primary=True)
     except Assignment.DoesNotExist:
         raise AssignmentError('ユーザーの主務の所属情報が見つかりません。')
 
+    # 1. 承認ルートを生成する
+    approval_route_users = generate_approval_route(primary_assignment)
+    if not approval_route_users:
+        # 承認ルートが見つからない場合もエラーハンドリングが必要
+        raise AssignmentError('承認ルートを生成できませんでした。管理者に連絡してください。')
+    
+    # 承認ルートをユーザーIDのリストとして保存
+    approval_route_ids = [user.pk for user in approval_route_users]
+    # 最初の承認者を現在の承認者として設定
+    current_approver = approval_route_users[0]
+
     # 2. 申請オブジェクトを作成
     application = Application.objects.create(
         applicant=applicant,
         applicant_assignment=primary_assignment,
+        approval_route=approval_route_ids,   # 生成した承認ルートを保存
+        current_approver=current_approver, # 最初の承認者をセット
         **form_data
     )
 
