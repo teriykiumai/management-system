@@ -1,0 +1,38 @@
+name: Django CI
+
+# pushやpull_requestをトリガーにワークフローを実行
+on:
+  push:
+    branches: [ "main", "develop" ]
+  pull_request:
+    branches: [ "main", "develop" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 4
+      matrix:
+        python-version: [ "3.11" ] # プロジェクトで使用しているPythonバージョン
+
+    steps:
+    - name: Checkout code
+      # リポジトリのコードをチェックアウト
+      uses: actions/checkout@v4
+
+    - name: Set up Python ${{ matrix.python-version }}
+      # バージョンのPython環境をセットアップ
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    # 必要な環境をインストール
+    - name: Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r CI_freeze_requirements.txt
+
+    # テストを実行
+    - name: Run Tests
+      run: |
+        python manage.py test
