@@ -20,3 +20,16 @@ class ApplicationForm(forms.ModelForm):
         self.fields['start_date'].label = "開始日"
         self.fields['end_date'].label = "終了日"
         self.fields['reason'].label = "申請理由"
+
+    def clean(self):
+        """フォーム全体のバリデーション"""
+        cleaned_data = super().clean()
+        leave_type = cleaned_data.get('leave_type')
+        start_date = cleaned_data.get('start_date')
+
+        # 半休または時間休の場合、終了日を開始日と同じにする
+        if leave_type in [Application.LeaveType.AM_HALF, Application.LeaveType.PM_HALF, Application.LeaveType.TIME]:
+            if start_date:
+                cleaned_data['end_date'] = start_date
+        
+        return cleaned_data
