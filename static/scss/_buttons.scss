@@ -2,19 +2,22 @@
 
 button, a.button {
     display: inline-block;
-    padding: 0.5rem 1rem;
+    padding: 0.6rem 1.2rem;
     border: 1px solid $primary-color;
     border-radius: $border-radius;
     background-color: $primary-color;
     color: $white;
     font-size: $base-font-size;
+    font-weight: 500;
     cursor: pointer;
     text-align: center;
-    transition: background-color 0.2s;
+    transition: background-color 0.2s, transform 0.1s;
 
     &:hover {
-        background-color: darken($primary-color, 10%);
+        background-color: darken($primary-color, 8%);
+        border-color: darken($primary-color, 8%);
         text-decoration: none;
         color: $white;
+        transform: translateY(-1px);
     }
 }

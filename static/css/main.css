@@ -6,17 +6,18 @@ body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   font-size: 16px;
-  color: #333;
+  color: #003366;
   background-color: #f4f7fa;
   line-height: 1.6;
 }
 
 h2, h3 {
-  color: #005A9C;
+  color: #003366;
+  font-weight: 600;
 }
 
 a {
-  color: #4A90E2;
+  color: #336699;
   text-decoration: none;
 }
 a:hover {
@@ -32,8 +33,8 @@ a:hover {
 .navbar {
   background-color: #fff;
   padding: 1rem 1.5rem;
-  border-bottom: 1px solid #ddd;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid #e0e6ed;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 .navbar .container {
   display: flex;
@@ -44,7 +45,7 @@ a:hover {
 .navbar .navbar-brand {
   font-weight: bold;
   font-size: 1.25rem;
-  color: #005A9C;
+  color: #003366;
 }
 .navbar .navbar-brand:hover {
   text-decoration: none;
@@ -55,10 +56,8 @@ a:hover {
   gap: 1.5rem;
 }
 .navbar .navbar-item {
-  color: #333;
-}
-.navbar .navbar-item.user-name {
-  color: #666;
+  color: #336699;
+  font-weight: 500;
 }
 
 main {
@@ -68,52 +67,63 @@ main {
 footer {
   text-align: center;
   padding: 2rem 0;
-  color: #888;
+  color: #3399ff;
   font-size: 0.9rem;
+  border-top: 1px solid #e0e6ed;
+  margin-top: 2rem;
 }
 
 button, a.button {
   display: inline-block;
-  padding: 0.5rem 1rem;
-  border: 1px solid #005A9C;
+  padding: 0.6rem 1.2rem;
+  border: 1px solid #336699;
   border-radius: 4px;
-  background-color: #005A9C;
+  background-color: #336699;
   color: #fff;
   font-size: 16px;
+  font-weight: 500;
   cursor: pointer;
   text-align: center;
-  transition: background-color 0.2s;
+  transition: background-color 0.2s, transform 0.1s;
 }
 button:hover, a.button:hover {
-  background-color: rgb(0, 60.5769230769, 105);
+  background-color: rgb(40.8, 81.6, 122.4);
+  border-color: rgb(40.8, 81.6, 122.4);
   text-decoration: none;
   color: #fff;
+  transform: translateY(-1px);
 }
 
 .card {
   background-color: #fff;
-  border: 1px solid #ddd;
+  border: 1px solid #e0e6ed;
   border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   margin-bottom: 2rem;
   padding: 1.5rem;
 }
 .card h3 {
   margin-top: 0;
-  border-bottom: 2px solid #f4f7fa;
-  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #e0e6ed;
+  padding-bottom: 0.75rem;
+  margin-bottom: 1.5rem;
+  font-size: 1.2rem;
 }
 .card ul {
   padding-left: 1.5rem;
   margin: 0;
+  list-style-type: none;
+}
+.card ul li {
+  margin-bottom: 0.5rem;
 }
 .card.alert {
-  border-left: 5px solid #e44d26;
+  border-left: 5px solid #FFCC66;
 }
 .card .balance-large {
-  font-size: 2rem;
-  font-weight: bold;
+  font-size: 2.2rem;
+  font-weight: 700;
   text-align: center;
-  color: #005A9C;
+  color: #336699;
   margin: 1rem 0;
 }/*# sourceMappingURL=main.css.map */
