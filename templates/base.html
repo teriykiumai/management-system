@@ -27,8 +27,20 @@
     </nav>
 
     <main>
-        {% block content %}
-        {% endblock %}
+        <div class="container">
+            {% comment %} 通知メッセー時の表示位置 {% endcomment %}
+            {% if messages %}
+            <ul class="messages">
+                {% for message in messages %}
+                <li class="message {{ message.tags }}">{{ message }}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+
+            {% comment %} 角コンテンツの表示位置 {% endcomment %}
+            {% block content %}
+            {% endblock %}
+        </div>
     </main>
 
     <footer>

@@ -1,0 +1,29 @@
+@import 'variables';
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: $spacing-unit;
+
+    thead {
+        background-color: lighten($background-color, 2%);
+        border-bottom: 2px solid $border-color;
+    }
+
+    th, td {
+        padding: $spacing-unit * 0.75;
+        text-align: left;
+        vertical-align: middle;
+    }
+    
+    tbody {
+        tr {
+        border-bottom: 1px solid $border-color;
+        transition: background-color 0.2s;
+        
+        &:hover {
+            background-color: lighten($background-color, 2%);
+        }
+        }
+    }
+}
