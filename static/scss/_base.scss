@@ -14,11 +14,12 @@ body {
 }
 
 h2, h3 {
-    color: $primary-color;
+  color: $text-color; // テキストの基本色（濃紺）に
+    font-weight: 600;
 }
 
 a {
-    color: $secondary-color;
+    color: $primary-color; // リンクはメインカラー（青）に
     text-decoration: none;
     &:hover {
         text-decoration: underline;

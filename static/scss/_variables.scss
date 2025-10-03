@@ -1,10 +1,35 @@
+// ===============================================
+// 1. 配色テーマの定義 (Sass Map)
+// ===============================================
+$themes: (
+    "default": (
+        "primary":    #336699, // メインカラー
+        "text":       #003366, // テキストカラー
+        "background": #f4f7fa, // 背景色
+        "accent":     #FFCC66  // アクセントカラー
+    )
+);
+
+// ===============================================
+// 2. 使用するテーマを選択
+// ===============================================
+$theme: "default";
+
+// ===============================================
+// 3. 選択されたテーマから動的に変数を設定
+// ===============================================
+$primary-color:    map-get(map-get($themes, $theme), "primary");
+$text-color:       map-get(map-get($themes, $theme), "text");
+$background-color: map-get(map-get($themes, $theme), "background");
+$accent-color:     map-get(map-get($themes, $theme), "accent");
+$secondary-color:  $accent-color; // secondary-colorとしてaccent-colorを割り当てる
+
+// ===============================================
+// 4. テーマに依存しない共通の変数
+// ===============================================
 // Colors
-$primary-color: #005A9C;
-$secondary-color: #4A90E2;
-$background-color: #f4f7fa;
-$text-color: #333;
 $white: #fff;
-$border-color: #ddd;
+$border-color: #e0e6ed;
 $alert-color: #e44d26;
 
 // Typography
@@ -17,4 +42,4 @@ $spacing-unit: 1rem; // 16px
 
 // Components
 $border-radius: 4px;
-$box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+$box-shadow: 0 2px 4px rgba(0,0,0,0.05);
