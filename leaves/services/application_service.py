@@ -2,6 +2,7 @@ from django.contrib.auth import get_user_model
 
 from leaves.models import Application, Assignment, ApprovalHistory, User
 from .approval_route_service import generate_approval_route
+from .time_leave_service import process_time_leave_slots
 
 User = get_user_model()
 
@@ -9,12 +10,13 @@ class AssignmentError(Exception):
     """所属情報が見つからない場合のエラー"""
     pass
 
-def create_application(applicant: User, form_data: dict) -> Application:
+def create_application(applicant: User, form_data: dict, post_data: dict) -> Application:
     """
     ユーザーとフォームデータから休暇申請を作成する.
     Args:
         applicant (User): 申請者.
         form_data (dict): 検証済みのフォームデータ.
+        post_data (dict): 時間休データを含む生のPOSTデータ.
     Returns:
         Application: 作成された休暇申請オブジェクト.
     Raises:
@@ -44,6 +46,15 @@ def create_application(applicant: User, form_data: dict) -> Application:
         current_approver=current_approver, # 最初の承認者をセット
         **form_data
     )
+
+    # もし時間休なら、時間帯データを処理する
+    if application.leave_type == Application.LeaveType.TIME:
+        total_minutes = process_time_leave_slots(application, post_data)
+        application.duration_minutes = total_minutes
+        application.save()
+    else:
+        # TODO: 時間休以外の合計時間も計算するロジック (例: 1日 = 480分)
+        pass
 
     # 3. 最初の承認履歴（本人の申請アクション）を記録
     ApprovalHistory.objects.create(

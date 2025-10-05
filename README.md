@@ -345,6 +345,7 @@ erDiagram
         string leave_type "django.TextChoices"
         date start_date
         date end_date
+        int duration_minutes "計算後の取得時間(分)"
         string status "django.TextChoices"
         string current_approver_id FK
     }
@@ -501,6 +502,7 @@ erDiagram
   - **company_leave_day**: 一斉取得の場合、関連するCompanyLeaveDayへの外部キー。
   - **leave_type**: 休暇の種類（有給、半休など）。
   - **start_date, end_date**: 休暇の期間。
+  - **duration_minutes**: 申請の合計時間。
   - **status**: 申請のステータス（申請中、承認済など）。
   - **current_approver**: 現在の承認担当者（User）への外部キー。
   - **approval_route**: 申請時の承認ルート（承認者のリスト）をJSON形式で保存する。

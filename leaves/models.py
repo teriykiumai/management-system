@@ -309,6 +309,8 @@ class Application(models.Model):
     reason = models.TextField(max_length=200, blank=True, verbose_name="申請理由")
     
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.APPLYING, verbose_name="ステータス")
+    duration_minutes = models.PositiveIntegerField(default=0, verbose_name="申請の合計時間（分）")
+
     current_approver = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,
         related_name="approval_tasks", verbose_name="現在の承認者"
