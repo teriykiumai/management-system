@@ -87,7 +87,11 @@ def application_create_view(request):
         if form.is_valid():
             try:
                 # ビジネスロジックをサービス関数に委譲
-                create_application(applicant=request.user, form_data=form.cleaned_data)
+                create_application(
+                    applicant=request.user, 
+                    form_data=form.cleaned_data, 
+                    post_data=request.POST
+                )
                 messages.success(request, '休暇申請を送信しました。')
                 return redirect('leaves:dashboard')
             except AssignmentError as e:
