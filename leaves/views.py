@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import Http404
 from django.db.models import Count
+from django.core.exceptions import ValidationError
 
 from .forms import ApplicationForm
 from .models import LeaveBalance, Application
@@ -97,6 +98,10 @@ def application_create_view(request):
             except AssignmentError as e:
                 # サービスから返されたエラーをユーザーに表示
                 messages.error(request, str(e))
+            except ValidationError as e:
+                # サービスのバリデーションエラーをフォームのエラーとして表示
+                # e.messageは単一の文字列、e.messagesはリスト
+                messages.error(request, e.message if hasattr(e, 'message') else e.messages[0])
     else:
         form = ApplicationForm()
 
