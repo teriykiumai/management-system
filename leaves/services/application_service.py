@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.db import transaction
 
 from leaves.models import Application, Assignment, ApprovalHistory, User
 from .approval_route_service import generate_approval_route
@@ -10,6 +11,7 @@ class AssignmentError(Exception):
     """所属情報が見つからない場合のエラー"""
     pass
 
+@transaction.atomic
 def create_application(applicant: User, form_data: dict, post_data: dict) -> Application:
     """
     ユーザーとフォームデータから休暇申請を作成する.
