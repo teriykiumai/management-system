@@ -1,8 +1,10 @@
 from django.contrib.auth import get_user_model
 from django.db import transaction
+from django.forms import ValidationError
 
-from leaves.models import Application, Assignment, ApprovalHistory, User
+from leaves.models import Application, Assignment, ApprovalHistory, User, LeaveBalance
 from leaves.constants import MINUTES_PER_WORK_DAY
+from leaves.services.fiscal_year import get_fiscal_year_for_date
 from .approval_route_service import generate_approval_route
 from .time_leave_service import process_time_leave_slots
 from .workday_service import count_workdays
@@ -27,6 +29,20 @@ def create_application(applicant: User, form_data: dict, post_data: dict) -> App
     Raises:
         AssignmentError: ユーザーの主務の所属が見つからない場合.
     """
+    try:
+        leave_start_date = form_data.get('start_date')
+        if not leave_start_date:
+            raise ValidationError("開始日が指定されていません。")
+
+        leave_fiscal_year = get_fiscal_year_for_date(leave_start_date)
+        
+        LeaveBalance.objects.get(user=applicant, year=leave_fiscal_year)
+    except LeaveBalance.DoesNotExist:
+        raise ValidationError(
+            f"{leave_fiscal_year}年度の休暇残高レコードが存在しません。"
+            "管理者が年度更新処理を行うまで、この年度の休暇は申請できません。"
+        )
+
     try:
         primary_assignment = Assignment.objects.get(user=applicant, is_primary=True)
     except Assignment.DoesNotExist:
