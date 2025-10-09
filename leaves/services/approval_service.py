@@ -1,4 +1,8 @@
-from leaves.models import Application, ApprovalHistory, User
+from django.utils import timezone
+
+from leaves.models import Application, ApprovalHistory, User, LeaveBalance
+from .balance_service import consume_balance, refund_balance, BalanceUpdateError
+
 
 class InvalidActionError(Exception):
     pass
@@ -41,6 +45,19 @@ def process_approval_action(application: Application, approver: User, action: st
             # 自分が最終承認者の場合
             application.current_approver = None
             application.status = Application.Status.APPROVED
+            # 残高消費ロジック
+            try:
+                if application.application_type == Application.ApplicationType.NEW:
+                    # balance_serviceの関数を呼び出す
+                    consume_balance(application)
+                elif application.application_type == Application.ApplicationType.CANCEL:
+                    # 取消申請の承認 -> 元の申請を取り消し＆残高返還
+                    target_app = application.cancellation_target
+                    target_app.status = Application.Status.CANCELLED
+                    target_app.save()
+                    refund_balance(target_app)
+            except BalanceUpdateError as e:
+                raise InvalidActionError(str(e))
     
     elif action == 'remand':
         application.status = Application.Status.REMANDED

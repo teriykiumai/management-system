@@ -6,18 +6,48 @@
 <div class="container">
     <div class="card">
         <h3>申請詳細</h3>
-        <p><strong>申請者:</strong> {{ application.applicant }}</p>
-        <p><strong>休暇種別:</strong> {{ application.get_leave_type_display }}</p>
-        <p><strong>期間:</strong> {{ application.start_date }} ~ {{ application.end_date }}</p>
-        <p><strong>理由:</strong> {{ application.reason|linebreaksbr }}</p>
-        <p><strong>ステータス:</strong> {{ application.get_status_display }}</p>
+        <dl class="detail-list">
+            <dt>申請ID</dt>
+            <dd>{{ application.pk }}</dd>
+
+            <dt>申請者</dt>
+            <dd>{{ application.applicant }}</dd>
+
+            <dt>休暇種別</dt>
+            <dd>{{ application.get_leave_type_display }}</dd>
+
+            <dt>期間</dt>
+            <dd>{{ application.start_date }} ~ {{ application.end_date }}</dd>
+            
+            {% if application.leave_type == 'TIME' %}
+            <dt>合計時間</dt>
+            <dd>{{ application.duration_minutes }}分</dd>
+            {% endif %}
+
+            <dt>理由</dt>
+            <dd>{{ application.reason|linebreaksbr }}</dd>
+            
+            <dt>ステータス</dt>
+            <dd><span class="status-tag status-{{ application.status|lower }}">{{ application.get_status_display }}</span></dd>
+            
+            {% if application.status == 'APPLYING' and application.current_approver %}
+                <dt>現在の承認者</dt>
+                <dd>{{ application.current_approver }}</dd>
+            {% endif %}
+        </dl>
     </div>
 
     <div class="card">
         <h3>承認履歴</h3>
-        <ul>
+        <ul class="approval-history">
             {% for history in histories %}
-                <li>{{ history.timestamp|date:"Y-m-d H:i" }} - {{ history.approver }} - {{ history.get_action_display }} - {{ history.comment }}</li>
+                <li>
+                    <strong>{{ history.get_action_display }}</strong> by {{ history.approver }}
+                    <small>({{ history.timestamp|date:"Y-m-d H:i" }})</small>
+                    {% if history.comment %}
+                        <p style="margin: 0.5em 0 0 0;">{{ history.comment }}</p>
+                    {% endif %}
+                </li>
             {% empty %}
                 <li>履歴はありません。</li>
             {% endfor %}
@@ -27,16 +57,28 @@
     {% if is_current_approver %}
     <div class="card">
         <h3>アクション</h3>
-        <form method="post">
+        <form method="post" class="action-form">
             {% csrf_token %}
             <div>
                 <label for="comment">コメント（差し戻し・却下の場合は必須）:</label>
                 <textarea name="comment" id="comment" rows="3"></textarea>
             </div>
             <br>
-            <button type="submit" name="action" value="approve">承認</button>
-            <button type="submit" name="action" value="remand">差し戻し</button>
-            <button type="submit" name="action" value="reject">却下</button>
+            <button type="submit" name="action" value="approve" class="button">承認</button>
+            <button type="submit" name="action" value="remand" class="button-danger">差し戻し</button>
+            <button type="submit" name="action" value="reject" class="button-danger">却下</button>
+        </form>
+    </div>
+    {% endif %}
+
+    {% comment %} 承認済みの申請に対して {% endcomment %}
+    {% if application.status == 'APPROVED' and application.applicant == user %}
+    <div class="card">
+        <h3>取消申請</h3>
+        <p>この承認済みの休暇申請を取り消しますか？<br><small>（この申請は、再度通常の承認フローを経て承認される必要があります）</small></p>
+        <form method="post" action="{% url 'leaves:request_cancellation' pk=application.pk %}">
+            {% csrf_token %}
+            <button type="submit" class="button-danger">取消を申請する</button>
         </form>
     </div>
     {% endif %}

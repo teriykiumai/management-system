@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.conf import settings 
 
-from .constants import MINUTES_PER_WORK_DAY
+from .constants import MINUTES_PER_WORK_DAY, MAX_HALF_LEAVE_COUNT_PER_YEAR
 
 
 # -----------------------------------------------------------------------------
@@ -242,6 +242,28 @@ class LeaveBalance(models.Model):
     @property
     def used_minutes_part(self) -> int:
         return self.used_minutes % MINUTES_PER_WORK_DAY
+    
+    @property
+    def remaining_half_leave_count(self) -> int:
+        """残りの半休取得可能回数を返す"""
+        return max(0, MAX_HALF_LEAVE_COUNT_PER_YEAR - self.half_leave_used_count)
+
+    @property
+    def remaining_time_leave_minutes(self) -> int:
+        """残りの時間休取得可能時間（分）を返す"""
+        try:
+            # 今年度の時間休上限を取得
+            limit = SystemSetting.objects.get(year=self.year).time_leave_limit_minutes
+        except SystemSetting.DoesNotExist:
+            # 設定がない場合はデフォルト値（8時間）を使用
+            limit = 480
+        
+        return max(0, limit - self.time_leave_used_minutes)
+    
+    @property
+    def remaining_time_leave_hours(self) -> int:
+        """残りの時間休取得可能時間（時間単位）を返す"""
+        return self.remaining_time_leave_minutes // 60
     
     def __str__(self):
         return f"{self.user} - {self.year}年度"

@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}申請履歴{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="card">
+        <h3>申請履歴一覧</h3>
+        {% if applications %}
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>申請ID</th>
+                            <th>休暇種別</th>
+                            <th>期間</th>
+                            <th>ステータス</th>
+                            <th>申請日</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for app in applications %}
+                        <tr>
+                            <td><a href="{% url 'leaves:application_detail' pk=app.pk %}">{{ app.pk }}</a></td>
+                            <td>{{ app.get_leave_type_display }}</td>
+                            <td>{{ app.start_date }} ~ {{ app.end_date }}</td>
+                            <td><span class="status-tag status-{{ app.status|lower }}">{{ app.get_status_display }}</span></td>
+                            <td>{{ app.created_at|date:"Y-m-d H:i" }}</td>
+                            <td><a href="{% url 'leaves:application_detail' pk=app.pk %}" class="button-small">詳細を見る</a></td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p>申請履歴はありません。</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

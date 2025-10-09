@@ -1,5 +1,6 @@
 from typing import List
 from django.db.models import Q
+
 from leaves.models import Assignment, Role, User
 
 
@@ -54,6 +55,7 @@ def generate_approval_route(applicant_assignment: Assignment) -> List[User]:
         List[User]: 承認者のリスト.
     """
     unique_approvers = {} # 兼務対応: 同じ承認者が複数回登場しないようにdictで管理
+    applicant_role_level = applicant_assignment.role.role_level # 申請者の役職レベルを取得
 
     # 1. 組織階層に基づく承認者を取得 (1次 -> 2次 -> 3次)
     for order in [1, 2, 3]:
@@ -62,12 +64,20 @@ def generate_approval_route(applicant_assignment: Assignment) -> List[User]:
             approver = approver_assignment.user
             approver_role = approver_assignment.role
 
-            # 申請者自身が承認者になるケースは除外
-            if approver and approver != applicant_assignment.user:
+            # 申請者自身が承認者になるケース除外し申請者より役職レベルが高い承認者のみを追加
+            if approver and approver != applicant_assignment.user and approver_role.role_level > applicant_role_level:
                 unique_approvers[approver.pk] = approver
                 # 承認ルートの終点フラグを持つ役職に到達したら探索を終了
                 if approver_role and approver_role.is_approval_endpoint:
                     break
+
+            # ▼ 修正: 申請者より役職レベルが高い承認者のみを追加 ▼
+            if approver and approver != applicant_assignment.user and approver_role.role_level > applicant_role_level:
+                unique_approvers[approver.pk] = approver
+                
+                if approver_role and approver_role.is_approval_endpoint:
+                    break
+
 
     # 2. 固定の最終承認者を追加
     for final_approver in _find_final_approvers():

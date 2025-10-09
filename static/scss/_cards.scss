@@ -39,3 +39,24 @@
         margin: $spacing-unit 0;
     }
 }
+
+.status-tag {
+    padding: 0.2em 0.6em;
+    border-radius: $border-radius;
+    font-size: 0.85em;
+    font-weight: 500;
+    color: $white;
+
+    &.status-applying, &.status-remanded {
+        background-color: $secondary-color; // 黄色
+    }
+    &.status-approved {
+        background-color: $success-color; // 緑
+    }
+    &.status-rejected {
+        background-color: $alert-color; // 赤
+    }
+    &.status-cancelled {
+        background-color: $cancel-color; // グレー
+    }
+}
