@@ -1,5 +1,6 @@
 from typing import List
 from django.db.models import Q
+
 from leaves.models import Assignment, Role, User
 
 

@@ -1,4 +1,7 @@
-from leaves.models import Application, ApprovalHistory, User
+from django.utils import timezone
+
+from leaves.models import Application, ApprovalHistory, User, LeaveBalance
+
 
 class InvalidActionError(Exception):
     pass
@@ -41,6 +44,18 @@ def process_approval_action(application: Application, approver: User, action: st
             # 自分が最終承認者の場合
             application.current_approver = None
             application.status = Application.Status.APPROVED
+            # 残高消費ロジック
+            try:
+                fiscal_year = application.start_date.year
+                balance, created = LeaveBalance.objects.get_or_create(
+                    user=application.applicant,
+                    year=fiscal_year,
+                )
+                # 使用分を加算
+                balance.used_minutes += application.duration_minutes
+                balance.save()
+            except Exception as e:
+                raise InvalidActionError(f"残高の更新に失敗しました: {e}")
     
     elif action == 'remand':
         application.status = Application.Status.REMANDED

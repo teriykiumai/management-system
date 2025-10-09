@@ -2,8 +2,11 @@ from django.contrib.auth import get_user_model
 from django.db import transaction
 
 from leaves.models import Application, Assignment, ApprovalHistory, User
+from leaves.constants import MINUTES_PER_WORK_DAY
 from .approval_route_service import generate_approval_route
 from .time_leave_service import process_time_leave_slots
+from .workday_service import count_workdays
+
 
 User = get_user_model()
 
@@ -32,7 +35,6 @@ def create_application(applicant: User, form_data: dict, post_data: dict) -> App
     # 1. 承認ルートを生成する
     approval_route_users = generate_approval_route(primary_assignment)
     if not approval_route_users:
-        # 承認ルートが見つからない場合もエラーハンドリングが必要
         raise AssignmentError('承認ルートを生成できませんでした。管理者に連絡してください。')
     
     # 承認ルートをユーザーIDのリストとして保存
@@ -49,11 +51,22 @@ def create_application(applicant: User, form_data: dict, post_data: dict) -> App
         **form_data
     )
 
-    # もし時間休なら、時間帯データを処理する
-    if application.leave_type == Application.LeaveType.TIME:
+    # 時間休なら、時間帯データを処理する
+    leave_type = application.leave_type
+    half_leaves = [Application.LeaveType.AM_HALF, Application.LeaveType.PM_HALF]
+    total_minutes = 0
+    if leave_type == Application.LeaveType.TIME:
         total_minutes = process_time_leave_slots(application, post_data)
-        application.duration_minutes = total_minutes
-        application.save(update_fields=['duration_minutes']) # duration_minutesのみ更新
+    elif leave_type in half_leaves:
+        # 仕様書通り、半休は一律4時間(240分)として計算
+        total_minutes = MINUTES_PER_WORK_DAY // 2
+    elif leave_type == Application.LeaveType.PAID:
+        # 終日の有給休暇は、労働日数 × 1日の労働時間（分）
+        workdays = count_workdays(application.start_date, application.end_date)
+        total_minutes = workdays * MINUTES_PER_WORK_DAY
+
+    application.duration_minutes = total_minutes
+    applicant.save(update_fields=['duration_minutes'])
 
     # 3. 最初の承認履歴（本人の申請アクション）を記録
     ApprovalHistory.objects.create(
