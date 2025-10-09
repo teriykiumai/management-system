@@ -48,7 +48,7 @@ def process_approval_action(application: Application, approver: User, action: st
             # 残高消費ロジック
             try:
                 if application.application_type == Application.ApplicationType.NEW:
-                    # 新規申請の承認 -> 残高消費
+                    # balance_serviceの関数を呼び出す
                     consume_balance(application)
                 elif application.application_type == Application.ApplicationType.CANCEL:
                     # 取消申請の承認 -> 元の申請を取り消し＆残高返還

@@ -151,17 +151,17 @@ def application_detail_view(request, pk: int):
 @login_required
 def request_cancellation_view(request, pk: int):
     """取消申請を処理するビュー (画面なし)"""
-    if request.method == 'POST':
+    if request.method != 'POST':
         return redirect('leaves:dashboard')
-    
+
     target_application = get_object_or_404(Application, pk=pk)
     try:
         create_cancellation_request(user=request.user, target_application=target_application)
         messages.success(request, f"申請ID:{pk}の取消申請を送信しました。")
     except (PermissionError, ValueError) as e:
         messages.error(request, str(e))
-
-    return redirect('leaves:dashboard')
+    
+    return redirect('leaves:application_detail', pk=pk) # ダッシュボードではなく詳細画面に戻る
 
 @login_required
 def application_history_view(request):

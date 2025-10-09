@@ -78,16 +78,30 @@ def create_application(applicant: User, form_data: dict, post_data: dict) -> App
     
     return application
 
-def create_cancellation_request(user: User, target_application: Application) -> Application: # type: ignore
-    """
-    承認済みの休暇申請に対する取消申請を作成する.
+def create_cancellation_request(user: User, target_application: Application) -> Application:
+    """承認済みの休暇申請に対する取消申請を作成する.
+    Args:
+        applicant (User): 申請者.
+        target_application (Application): 取り消ししたい申請オブジェクト.
+    Returns:
+        Application: 作成された取り消し申請オブジェクト.
+    Raises:
+        PermissionError: ユーザに紐づかない申請を取り消ししようとした場合.
+        ValueError: ステータスが承認済みでない場合
     """
     if target_application.applicant != user:
         raise PermissionError("自分の申請しか取り消せません。")
     if target_application.status != Application.Status.APPROVED:
         raise ValueError("承認済みの申請しか取り消せません。")
     
-    # 元の申請の承認ルートと最初の承認者をコピー
+    # 既に同じ申請に対する未完了の取消申請があればエラー
+    if Application.objects.filter(
+        application_type=Application.ApplicationType.CANCEL,
+        cancellation_target=target_application,
+        status__in=[Application.Status.APPLYING, Application.Status.REMANDED]
+    ).exists():
+        raise ValueError("この休暇に対する取消申請は既に提出されています。")
+
     approval_route_ids = target_application.approval_route
     current_approver_id = approval_route_ids[0] if approval_route_ids else None
 
@@ -96,13 +110,11 @@ def create_cancellation_request(user: User, target_application: Application) -> 
         applicant_assignment=target_application.applicant_assignment,
         application_type=Application.ApplicationType.CANCEL,
         cancellation_target=target_application,
-        # 取消申請の内容は元の申請をコピー
         leave_type=target_application.leave_type,
         start_date=target_application.start_date,
         end_date=target_application.end_date,
         reason=f"【取消申請】\n{target_application.reason}",
         duration_minutes=target_application.duration_minutes,
-        # 承認ルートも元の申請と同じものを設定
         approval_route=approval_route_ids,
         current_approver_id=current_approver_id,
     )
