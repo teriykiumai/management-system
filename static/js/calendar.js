@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // フィルタ要素が存在しない場合も安全に値を取得するヘルパー関数
     function getFilterValue(id) {
         const element = document.getElementById(id);
-        return element ? element.value : ''; // 要素があれば値を、なければ空文字を返す
+        return element ? element.value : '';
     }
 
     const calendar = new FullCalendar.Calendar(calendarEl, {
