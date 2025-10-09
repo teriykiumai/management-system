@@ -1,17 +1,20 @@
+from datetime import timedelta
+
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import login, get_user_model, logout
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import Http404
-from django.db.models import Count
+from django.http import Http404, JsonResponse
+from django.db.models import Count, Q
 from django.core.exceptions import ValidationError
 
 from .forms import ApplicationForm
-from .models import LeaveBalance, Application
+from .models import LeaveBalance, Application, Assignment, Department, Group, Team, Role
 from .services.fiscal_year_service import get_current_fiscal_year
 from .services.application_service import create_application, create_cancellation_request, AssignmentError
 from .services.approval_service import process_approval_action, InvalidActionError
+from .services.calendar_service import get_visible_applications_for_user
 
 
 User = get_user_model()
@@ -177,3 +180,56 @@ def application_history_view(request):
         'applications': applications,
     }
     return render(request, 'leaves/application_history.html', context)
+
+@login_required
+def calendar_view(request):
+    """カレンダー表示ページのビュー"""
+    try:
+        primary_assignment = Assignment.objects.get(user=request.user, is_primary=True)
+        view_scope = primary_assignment.role.view_scope
+    except Assignment.DoesNotExist:
+        view_scope = Role.ViewScope.TEAM 
+
+    context = {
+        'departments': Department.objects.all(),
+        'groups': Group.objects.all(),
+        'teams': Team.objects.all(),
+        'leave_types': Application.LeaveType.choices,
+        'view_scope': view_scope,
+    }
+    return render(request, 'leaves/calendar.html', context)
+
+@login_required
+def leave_events_api(request):
+    """カレンダー用の休暇イベントデータを返すAPIビュー"""
+    department_id = request.GET.get('department')
+    group_id = request.GET.get('group')
+    team_id = request.GET.get('team')
+    leave_type = request.GET.get('leave_type')
+
+    # ▼ 修正: サービスにパラメータを渡す ▼
+    applications = get_visible_applications_for_user(
+        request.user, department_id, group_id, team_id, leave_type
+    )
+
+    # 色分け用のカラーマップを定義
+    color_map = {
+        Application.LeaveType.PAID: '#58D68D',      # 有給休暇 
+        Application.LeaveType.AM_HALF: '#5DADE2',   # 午前半休 
+        Application.LeaveType.PM_HALF: '#5DADE2',   # 午後休 
+        Application.LeaveType.TIME: '#F5B041',      # 時間休 
+        Application.LeaveType.SPECIAL: '#333333',   # 慶弔休暇
+    }
+
+
+    events = []
+    for app in applications:
+        events.append({
+            'title': f"{app.applicant.last_name} ({app.get_leave_type_display()})",
+            'start': app.start_date,
+            'end': app.end_date + timedelta(days=1),
+            'backgroundColor': color_map.get(app.leave_type, '#a0a0a0'),
+            'borderColor': color_map.get(app.leave_type, '#a0a0a0'),
+        })
+
+    return JsonResponse(events, safe=False)

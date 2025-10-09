@@ -23,6 +23,11 @@
                         href="{% url 'leaves:dashboard' %}">
                         ダッシュボード
                     </a>
+
+                    <a class="navbar-item {% if request.resolver_match.url_name == 'calendar' %}active{% endif %}" 
+                        href="{% url 'leaves:calendar' %}">
+                        カレンダー
+                    </a>
                     
                     {% if user.is_staff %}
                         <a class="navbar-item {% if 'admin' in request.path %}active{% endif %}" 

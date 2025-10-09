@@ -73,3 +73,17 @@ footer {
     border-top: 1px solid $border-color;
     margin-top: $spacing-unit * 2;
 }
+
+.calendar-filters {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid $border-color;
+
+    select {
+        padding: 0.5rem;
+        border-radius: $border-radius;
+        border: 1px solid $border-color;
+    }
+}
