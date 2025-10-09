@@ -6,35 +6,53 @@
 {% block content %}
 <div class="container">
     <div class="card">
+        {% comment %} フィルタ作成 {% endcomment %}
+        <div class="calendar-filters">
+            {# ▼ ALL権限の場合のみ部署フィルタを表示 ▼ #}
+            {% if view_scope == 'ALL' %}
+            <select id="departmentFilter">
+                <option value="">全部署</option>
+                {% for dep in departments %}
+                <option value="{{ dep.pk }}">{{ dep.department_name }}</option>
+                {% endfor %}
+            </select>
+            {% endif %}
+
+            {# ▼ ALLまたはDEPARTMENT権限の場合にグループフィルタを表示 ▼ #}
+            {% if view_scope == 'ALL' or view_scope == 'DEPARTMENT' %}
+            <select id="groupFilter">
+                <option value="">全グループ</option>
+                {% for group in groups %}
+                <option value="{{ group.pk }}">{{ group.group_name }}</option>
+                {% endfor %}
+            </select>
+            {% endif %}
+            
+            {# ▼ ALL, DEPARTMENT, GROUP権限の場合にチームフィルタを表示 ▼ #}
+            {% if view_scope == 'ALL' or view_scope == 'DEPARTMENT' or view_scope == 'GROUP' %}
+            <select id="teamFilter">
+                <option value="">全チーム</option>
+                {% for team in teams %}
+                <option value="{{ team.pk }}">{{ team.team_name }}</option>
+                {% endfor %}
+            </select>
+            {% endif %}
+
+            <select id="leaveTypeFilter">
+                <option value="">全休暇種別</option>
+                {% for value, display in leave_types %}
+                <option value="{{ value }}">{{ display }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
         <div id='calendar'></div>
     </div>
 </div>
 {% endblock %}
 
+{# ▼ JS読み込み #}
 {% block extra_js %}
-{# FullCalendarライブラリ本体を読み込み #}
 <script src="{% static 'fullcalendar/index.global.min.js' %}"></script>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    var calendarEl = document.getElementById('calendar');
-    var calendar = new FullCalendar.Calendar(calendarEl, {
-        initialView: 'dayGridMonth', // 月表示
-        locale: 'ja', // 日本語化
-        headerToolbar: {
-            left: 'prev,next today',
-            center: 'title',
-            right: 'dayGridMonth,timeGridWeek'
-        },
-        buttonText: { // ボタンのテキストを日本語に
-            today: '今日',
-            month: '月',
-            week: '週',
-        },
-        // ここで先ほど作成したAPIエンドポイントを指定
-        events: "{% url 'leaves:leave_events_api' %}",
-    });
-    calendar.render();
-});
-</script>
+<script src="{% static 'js/calendar.js' %}"></script>
 {% endblock %}
