@@ -39,7 +39,8 @@
                 <li>申請履歴がありません。</li>
             {% endfor %}
         </ul>
-        <a href="{% url 'leaves:application_create' %}" class="button">休暇を申請する</a> |  <a href="#">申請履歴を見る</a>
+        <a href="{% url 'leaves:application_create' %}" class="button">休暇を申請する</a> |  <a href="{% url 'leaves:application_history' %}">申請履歴を見る</a>
+        
     </div>
 
 </div>

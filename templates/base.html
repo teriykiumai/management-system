@@ -14,10 +14,15 @@
             <a class="navbar-brand" href="{% url 'home' %}">勤怠管理システム</a>
             <div class="navbar-menu">
                 {% if user.is_authenticated %}
-                    <span class="navbar-item">
+                    <span class="navbar-item user-name">
                         ようこそ, {{ user.last_name }} {{ user.first_name }} さん
                     </span>
                     <a class="navbar-item" href="{% url 'leaves:dashboard' %}">ダッシュボード</a>
+                    
+                    {% if user.is_staff %}
+                        <a class="navbar-item" href="{% url 'admin:index' %}">管理者画面</a>
+                    {% endif %}
+
                     <a class="navbar-item" href="{% url 'logout' %}">ログアウト</a>
                 {% else %}
                     <a class="navbar-item" href="{% url 'dev_login' %}">ログイン</a>

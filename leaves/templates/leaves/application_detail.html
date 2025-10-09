@@ -40,5 +40,17 @@
         </form>
     </div>
     {% endif %}
+
+    {% comment %} 承認済みのもの申請に対して {% endcomment %}
+    {% if application.status == 'APPROVED' and application.applicant == user %}
+    <div class="card">
+        <h3>取消申請</h3>
+        <p>この承認済みの休暇申請を取り消しますか？</p>
+        <form method="post" action="{% url 'leaves:request_cancellation' pk=application.pk %}">
+            {% csrf_token %}
+            <button type="submit" class="button-danger">取消を申請する</button>
+        </form>
+    </div>
+    {% endif %}
 </div>
 {% endblock %}

@@ -66,7 +66,7 @@ def create_application(applicant: User, form_data: dict, post_data: dict) -> App
         total_minutes = workdays * MINUTES_PER_WORK_DAY
 
     application.duration_minutes = total_minutes
-    applicant.save(update_fields=['duration_minutes'])
+    application.save(update_fields=['duration_minutes'])
 
     # 3. 最初の承認履歴（本人の申請アクション）を記録
     ApprovalHistory.objects.create(
@@ -77,3 +77,41 @@ def create_application(applicant: User, form_data: dict, post_data: dict) -> App
     )
     
     return application
+
+def create_cancellation_request(user: User, target_application: Application) -> Application:
+    """
+    承認済みの休暇申請に対する取消申請を作成する.
+    """
+    if target_application.applicant != user:
+        raise PermissionError("自分の申請しか取り消せません。")
+    if target_application.status != Application.Status.APPROVED:
+        raise ValueError("承認済みの申請しか取り消せません。")
+    
+    # 元の申請の承認ルートと最初の承認者をコピー
+    approval_route_ids = target_application.approval_route
+    current_approver_id = approval_route_ids[0] if approval_route_ids else None
+
+    cancellation_app = Application.objects.create(
+        applicant=user,
+        applicant_assignment=target_application.applicant_assignment,
+        application_type=Application.ApplicationType.CANCEL,
+        cancellation_target=target_application,
+        # 取消申請の内容は元の申請をコピー
+        leave_type=target_application.leave_type,
+        start_date=target_application.start_date,
+        end_date=target_application.end_date,
+        reason=f"【取消申請】\n{target_application.reason}",
+        duration_minutes=target_application.duration_minutes,
+        # 承認ルートも元の申請と同じものを設定
+        approval_route=approval_route_ids,
+        current_approver_id=current_approver_id,
+    )
+
+    ApprovalHistory.objects.create(
+        application=cancellation_app,
+        approver=user,
+        action=ApprovalHistory.Action.APPLY,
+        comment="取消申請"
+    )
+
+    return cancellation_app
