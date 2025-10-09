@@ -26,6 +26,7 @@
                             <td>{{ app.start_date }} ~ {{ app.end_date }}</td>
                             <td><span class="status-tag status-{{ app.status|lower }}">{{ app.get_status_display }}</span></td>
                             <td>{{ app.created_at|date:"Y-m-d H:i" }}</td>
+                            <td><a href="{% url 'leaves:application_detail' pk=app.pk %}" class="button-small">詳細を見る</a></td>
                         </tr>
                     {% endfor %}
                     </tbody>

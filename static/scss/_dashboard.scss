@@ -1,0 +1,42 @@
+@import 'variables';
+
+// ページ上部のアクションエリア
+.dashboard-actions {
+    display: flex;
+    gap: $spacing-unit * 1.5;
+    margin-bottom: $spacing-unit * 2;
+
+    .button {
+        flex: 1;
+        font-size: 1.2rem;
+        padding: $spacing-unit * 1.2;
+        text-align: center;
+    }
+}
+
+// 残高サマリーカード
+.balance-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: $spacing-unit * 1.5;
+    text-align: center;
+
+    .balance-item {
+        background-color: lighten($background-color, 3%);
+        padding: $spacing-unit * 1.5;
+        border-radius: $border-radius;
+        border: 1px solid $border-color;
+
+        .value {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: $primary-color;
+        line-height: 1.2;
+        }
+
+        .label {
+        font-size: 0.9rem;
+        color: lighten($text-color, 30%);
+        }
+    }
+}

@@ -11,19 +11,27 @@
 <body>
     <nav class="navbar">
         <div class="container">
-            <a class="navbar-brand" href="{% url 'home' %}">勤怠管理システム</a>
+            <a class="navbar-brand" href="{% url 'home' %}">休暇申請システム</a>
             <div class="navbar-menu">
                 {% if user.is_authenticated %}
                     <span class="navbar-item user-name">
-                        ようこそ, {{ user.last_name }} {{ user.first_name }} さん
+                        {{ user.last_name }} さん
                     </span>
-                    <a class="navbar-item" href="{% url 'leaves:dashboard' %}">ダッシュボード</a>
+                    
+                    {# request.resolver_match.url_name で現在のURL名を取得し、'dashboard'と一致すれば active クラスを付与 #}
+                    <a class="navbar-item {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" 
+                        href="{% url 'leaves:dashboard' %}">
+                        ダッシュボード
+                    </a>
                     
                     {% if user.is_staff %}
-                        <a class="navbar-item" href="{% url 'admin:index' %}">管理者画面</a>
+                        <a class="navbar-item {% if 'admin' in request.path %}active{% endif %}" 
+                            href="{% url 'admin:index' %}">
+                            ⚙️ 管理者画面
+                        </a>
                     {% endif %}
 
-                    <a class="navbar-item" href="{% url 'logout' %}">ログアウト</a>
+                    <a class="navbar-item" href="{% url 'logout' %}">🚪 ログアウト</a>
                 {% else %}
                     <a class="navbar-item" href="{% url 'dev_login' %}">ログイン</a>
                 {% endif %}

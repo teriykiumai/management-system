@@ -25,6 +25,7 @@
                         <td>{{ app.get_leave_type_display }}</td>
                         <td>{{ app.start_date }} ~ {{ app.end_date }}</td>
                         <td>{{ app.created_at|date:"Y-m-d H:i" }}</td>
+                        <td><a href="{% url 'leaves:application_detail' pk=app.pk %}" class="button-small">詳細を確認</a></td>
                     </tr>
                 {% endfor %}
                 </tbody>

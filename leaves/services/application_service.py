@@ -15,7 +15,7 @@ class AssignmentError(Exception):
     pass
 
 @transaction.atomic
-def create_application(applicant: User, form_data: dict, post_data: dict) -> Application:
+def create_application(applicant: User, form_data: dict, post_data: dict) -> Application: # type: ignore
     """
     ユーザーとフォームデータから休暇申請を作成する.
     Args:
@@ -78,7 +78,7 @@ def create_application(applicant: User, form_data: dict, post_data: dict) -> App
     
     return application
 
-def create_cancellation_request(user: User, target_application: Application) -> Application:
+def create_cancellation_request(user: User, target_application: Application) -> Application: # type: ignore
     """
     承認済みの休暇申請に対する取消申請を作成する.
     """

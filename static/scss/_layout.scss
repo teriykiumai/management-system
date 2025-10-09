@@ -7,34 +7,57 @@
 }
 
 .navbar {
-    background-color: $white;
-    padding: $spacing-unit $spacing-unit * 1.5;
-    border-bottom: 1px solid $border-color;
-    box-shadow: $box-shadow;
+    background-color: $text-color; // 背景をテーマの濃紺に
+    color: $white;
+    padding: 0 ($spacing-unit * 1.5); // 上下のpaddingを0に
 
     .container {
         display: flex;
         justify-content: space-between;
         align-items: center;
+        min-height: 60px;
         padding: 0;
     }
 
     .navbar-brand {
         font-weight: bold;
         font-size: 1.25rem;
-        color: $text-color; // ブランドロゴは濃紺に
+        color: $white; // 文字色を白に
         &:hover { text-decoration: none; }
     }
 
     .navbar-menu {
         display: flex;
-        align-items: center;
-        gap: $spacing-unit * 1.5;
+        align-items: stretch; // 高さをnavbarに合わせる
+        height: 60px;
     }
     
     .navbar-item {
-        color: $primary-color; // ナビゲーションリンクはメインカラー（青）に
+        display: flex;
+        align-items: center;
+        padding: 0 $spacing-unit * 1.5;
+        color: lighten($white, 15%); // 少し落ち着いた白に
         font-weight: 500;
+        border-bottom: 3px solid transparent; // アクティブ表示用の下線
+        transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+
+        &:hover {
+        text-decoration: none;
+        background-color: lighten($text-color, 10%); // ホバー時に少し明るく
+        color: $white;
+        }
+
+        // 現在表示しているページ用のスタイル
+        &.active {
+        color: $white;
+        border-bottom-color: $accent-color; // アクセントカラー（黄）の下線
+        }
+    }
+
+    .user-name {
+        color: lighten($white, 30%);
+        font-size: 0.9rem;
+        margin-right: $spacing-unit;
     }
 }
 
