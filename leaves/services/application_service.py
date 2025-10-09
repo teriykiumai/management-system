@@ -1,41 +1,76 @@
-from django.contrib.auth import get_user_model
 from django.db import transaction
-from django.forms import ValidationError
+from django.core.exceptions import ValidationError
+from django.contrib.auth import get_user_model
+from typing import Dict, Any, Tuple
 
-from leaves.models import Application, Assignment, ApprovalHistory, User, LeaveBalance
+from leaves.models import Application, Assignment, ApprovalHistory, LeaveBalance
 from leaves.constants import MINUTES_PER_WORK_DAY
-from leaves.services.fiscal_year import get_fiscal_year_for_date
 from .approval_route_service import generate_approval_route
-from .time_leave_service import process_time_leave_slots
+from .time_leave_service import (
+    validate_time_leave_request, 
+    calculate_time_leave_minutes, 
+    save_time_leave_slots,
+    parse_time_slots,
+)
+from .fiscal_year_service import get_fiscal_year_for_date
 from .workday_service import count_workdays
-
+from .balance_service import validate_sufficient_balance
 
 User = get_user_model()
 
 class AssignmentError(Exception):
-    """所属情報が見つからない場合のエラー"""
     pass
 
-@transaction.atomic
-def create_application(applicant: User, form_data: dict, post_data: dict) -> Application: # type: ignore
+def _prepare_application_data(applicant: User, form_data: Dict, post_data: Dict) -> Dict[str, Any]: # type: ignore
     """
-    ユーザーとフォームデータから休暇申請を作成する.
-    Args:
-        applicant (User): 申請者.
-        form_data (dict): 検証済みのフォームデータ.
-        post_data (dict): 時間休データを含む生のPOSTデータ.
-    Returns:
-        Application: 作成された休暇申請オブジェクト.
-    Raises:
-        AssignmentError: ユーザーの主務の所属が見つからない場合.
+    DBに保存する前の、申請に関連する全てのデータを準備・計算する.
     """
-    try:
-        leave_start_date = form_data.get('start_date')
-        if not leave_start_date:
-            raise ValidationError("開始日が指定されていません。")
+    # 1. 基本情報を準備
+    leave_type = form_data.get('leave_type')
+    start_date = form_data.get('start_date')
+    end_date = form_data.get('end_date')
 
-        leave_fiscal_year = get_fiscal_year_for_date(leave_start_date)
-        
+    # 2. 所属情報と承認ルートを準備
+    try:
+        primary_assignment = Assignment.objects.get(user=applicant, is_primary=True)
+    except Assignment.DoesNotExist:
+        raise AssignmentError('ユーザーの主務の所属情報が見つかりません。')
+
+    approval_route_users = generate_approval_route(primary_assignment)
+    if not approval_route_users:
+        raise AssignmentError('承認ルートを生成できませんでした。管理者に連絡してください。')
+    
+    # 消費時間(分)を計算
+    duration_minutes = 0
+    processed_slots = [] # 時間休の場合の計算済みスロット
+    leave_type = form_data.get('leave_type')
+
+    if leave_type == Application.LeaveType.TIME:
+        time_slots_data = parse_time_slots(post_data) # time_leave_serviceのヘルパーを一時的に借用
+        duration_minutes, processed_slots = calculate_time_leave_minutes(applicant, time_slots_data)
+    elif leave_type in [Application.LeaveType.AM_HALF, Application.LeaveType.PM_HALF]:
+        duration_minutes = MINUTES_PER_WORK_DAY // 2
+    elif leave_type == Application.LeaveType.PAID:
+        workdays = count_workdays(form_data.get('start_date'), form_data.get('end_date'))
+        duration_minutes = workdays * MINUTES_PER_WORK_DAY
+
+    return {
+        "applicant": applicant,
+        "applicant_assignment": primary_assignment,
+        "approval_route": [user.pk for user in approval_route_users],
+        "current_approver": approval_route_users[0],
+        "duration_minutes": duration_minutes,
+        "processed_slots": processed_slots, # 計算済みスロットも渡す
+        **form_data
+    }
+
+def _validate_application_request(applicant: User, prepared_data: Dict, post_data: Dict): # type: ignore
+    """
+    準備されたデータを用いて、申請前の全てのバリデーションを実行する.
+    """
+    # 1. 残高レコードの存在チェック
+    try:
+        leave_fiscal_year = get_fiscal_year_for_date(prepared_data['start_date'])
         LeaveBalance.objects.get(user=applicant, year=leave_fiscal_year)
     except LeaveBalance.DoesNotExist:
         raise ValidationError(
@@ -43,67 +78,52 @@ def create_application(applicant: User, form_data: dict, post_data: dict) -> App
             "管理者が年度更新処理を行うまで、この年度の休暇は申請できません。"
         )
 
-    try:
-        primary_assignment = Assignment.objects.get(user=applicant, is_primary=True)
-    except Assignment.DoesNotExist:
-        raise AssignmentError('ユーザーの主務の所属情報が見つかりません。')
+    # 2. 時間休固有のバリデーション (専用関数を呼び出す)
+    if prepared_data['leave_type'] == Application.LeaveType.TIME:
+        validate_time_leave_request(applicant, post_data)
 
-    # 1. 承認ルートを生成する
-    approval_route_users = generate_approval_route(primary_assignment)
-    if not approval_route_users:
-        raise AssignmentError('承認ルートを生成できませんでした。管理者に連絡してください。')
+    # 3. 残高不足チェック
+    validate_sufficient_balance(applicant, prepared_data['duration_minutes'])
+
+
+@transaction.atomic
+def create_application(applicant: User, form_data: dict, post_data: dict) -> Application: # type: ignore
+    """ユーザーとフォームデータから休暇申請を作成する (司令塔)."""
+    # 申請に必要なデータを全て準備・計算する
+    prepared_data = _prepare_application_data(applicant, form_data, post_data)
+
+    # 準備したデータを使って、全てのバリデーションを実行する
+    _validate_application_request(applicant, prepared_data, post_data)
+
+    # バリデーションを全て通過したら、DBに保存する
+    processed_slots = prepared_data.pop('processed_slots') # 後で使うので取り出す
+    application = Application.objects.create(**prepared_data)
     
-    # 承認ルートをユーザーIDのリストとして保存
-    approval_route_ids = [user.pk for user in approval_route_users]
-    # 最初の承認者を現在の承認者として設定
-    current_approver = approval_route_users[0]
-
-    # 2. 申請オブジェクトを作成
-    application = Application.objects.create(
-        applicant=applicant,
-        applicant_assignment=primary_assignment,
-        approval_route=approval_route_ids,   # 生成した承認ルートを保存
-        current_approver=current_approver, # 最初の承認者をセット
-        **form_data
-    )
-
-    # 時間休なら、時間帯データを処理する
-    leave_type = application.leave_type
-    half_leaves = [Application.LeaveType.AM_HALF, Application.LeaveType.PM_HALF]
-    total_minutes = 0
-    if leave_type == Application.LeaveType.TIME:
-        total_minutes = process_time_leave_slots(application, post_data)
-    elif leave_type in half_leaves:
-        # 仕様書通り、半休は一律4時間(240分)として計算
-        total_minutes = MINUTES_PER_WORK_DAY // 2
-    elif leave_type == Application.LeaveType.PAID:
-        # 終日の有給休暇は、労働日数 × 1日の労働時間（分）
-        workdays = count_workdays(application.start_date, application.end_date)
-        total_minutes = workdays * MINUTES_PER_WORK_DAY
-
-    application.duration_minutes = total_minutes
-    application.save(update_fields=['duration_minutes'])
-
-    # 3. 最初の承認履歴（本人の申請アクション）を記録
+    # 時間休の場合はスロットも保存
+    if application.leave_type == Application.LeaveType.TIME:
+        save_time_leave_slots(application, processed_slots)
+    
     ApprovalHistory.objects.create(
         application=application,
         approver=applicant,
         action=ApprovalHistory.Action.APPLY,
         comment="新規申請"
     )
-    
     return application
 
+
 def create_cancellation_request(user: User, target_application: Application) -> Application:
-    """承認済みの休暇申請に対する取消申請を作成する.
+    """
+    承認済みの休暇申請に対する取消申請を作成する.
+
     Args:
-        applicant (User): 申請者.
-        target_application (Application): 取り消ししたい申請オブジェクト.
+        user (User): 取消を申請するユーザー.
+        target_application (Application): 取り消しの対象となる、承認済みの申請.
     Returns:
-        Application: 作成された取り消し申請オブジェクト.
+        Application: 新しく作成された取消申請オブジェクト.
     Raises:
-        PermissionError: ユーザに紐づかない申請を取り消ししようとした場合.
-        ValueError: ステータスが承認済みでない場合
+        PermissionError: 申請者本人でないユーザーが取消を試みた場合.
+        ValueError: 承認済みでない申請を取り消そうとした場合や、既に取消申請中の場合.
     """
     if target_application.applicant != user:
         raise PermissionError("自分の申請しか取り消せません。")
@@ -118,6 +138,7 @@ def create_cancellation_request(user: User, target_application: Application) -> 
     ).exists():
         raise ValueError("この休暇に対する取消申請は既に提出されています。")
 
+    # 元の申請の承認ルートと最初の承認者をコピー
     approval_route_ids = target_application.approval_route
     current_approver_id = approval_route_ids[0] if approval_route_ids else None
 
@@ -126,11 +147,13 @@ def create_cancellation_request(user: User, target_application: Application) -> 
         applicant_assignment=target_application.applicant_assignment,
         application_type=Application.ApplicationType.CANCEL,
         cancellation_target=target_application,
+        # 取消申請の内容は元の申請をコピー
         leave_type=target_application.leave_type,
         start_date=target_application.start_date,
         end_date=target_application.end_date,
         reason=f"【取消申請】\n{target_application.reason}",
         duration_minutes=target_application.duration_minutes,
+        # 承認ルートも元の申請と同じものを設定
         approval_route=approval_route_ids,
         current_approver_id=current_approver_id,
     )

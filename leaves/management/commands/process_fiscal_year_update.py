@@ -1,6 +1,7 @@
 from datetime import date
 from django.core.management.base import BaseCommand
 from django.db import transaction
+
 from leaves.models import User, LeaveBalance
 from leaves.services.balance_service import calculate_newly_granted_minutes
 from leaves.constants import MINUTES_PER_WORK_DAY

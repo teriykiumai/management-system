@@ -9,7 +9,7 @@ from django.core.exceptions import ValidationError
 
 from .forms import ApplicationForm
 from .models import LeaveBalance, Application
-from .services.fiscal_year import get_current_fiscal_year
+from .services.fiscal_year_service import get_current_fiscal_year
 from .services.application_service import create_application, create_cancellation_request, AssignmentError
 from .services.approval_service import process_approval_action, InvalidActionError
 
@@ -152,16 +152,18 @@ def application_detail_view(request, pk: int):
 def request_cancellation_view(request, pk: int):
     """取消申請を処理するビュー (画面なし)"""
     if request.method != 'POST':
-        return redirect('leaves:dashboard')
+        return redirect('leaves:dashboard') 
 
     target_application = get_object_or_404(Application, pk=pk)
     try:
+        # サービスを呼び出して取消申請を作成
         create_cancellation_request(user=request.user, target_application=target_application)
         messages.success(request, f"申請ID:{pk}の取消申請を送信しました。")
     except (PermissionError, ValueError) as e:
         messages.error(request, str(e))
     
-    return redirect('leaves:application_detail', pk=pk) # ダッシュボードではなく詳細画面に戻る
+    # 処理後は、元の申請詳細画面に戻る
+    return redirect('leaves:application_detail', pk=pk)
 
 @login_required
 def application_history_view(request):
