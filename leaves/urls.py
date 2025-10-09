@@ -10,4 +10,6 @@ urlpatterns = [
     path('approvals/', views.approval_task_list_view, name='approval_list'),
     path('application/<int:pk>/', views.application_detail_view, name='application_detail'),
     path('application/<int:pk>/cancel/', views.request_cancellation_view, name='request_cancellation'),
+    path('calendar/', views.calendar_view, name='calendar'),
+    path('api/events/', views.leave_events_api, name='leave_events_api'),
 ]

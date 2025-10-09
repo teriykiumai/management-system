@@ -1,14 +1,16 @@
+from datetime import timedelta
+
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import login, get_user_model, logout
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import Http404
-from django.db.models import Count
+from django.http import Http404, JsonResponse
+from django.db.models import Count, Q
 from django.core.exceptions import ValidationError
 
 from .forms import ApplicationForm
-from .models import LeaveBalance, Application
+from .models import LeaveBalance, Application, Assignment
 from .services.fiscal_year_service import get_current_fiscal_year
 from .services.application_service import create_application, create_cancellation_request, AssignmentError
 from .services.approval_service import process_approval_action, InvalidActionError
@@ -177,3 +179,29 @@ def application_history_view(request):
         'applications': applications,
     }
     return render(request, 'leaves/application_history.html', context)
+
+@login_required
+def calendar_view(request):
+    """カレンダー表示ページのビュー"""
+    return render(request, 'leaves/calendar.html')
+
+@login_required
+def leave_events_api(request):
+    """カレンダー用の休暇イベントデータを返すAPIビュー"""
+    
+    # 承認済みで、まだ取り消されていない申請を取得
+    applications = Application.objects.filter(
+        status=Application.Status.APPROVED
+    ).exclude(
+        application_type=Application.ApplicationType.CANCEL
+    )
+
+    events = []
+    for app in applications:
+        events.append({
+            'title': f"{app.applicant.last_name} ({app.get_leave_type_display()})",
+            'start': app.start_date,
+            'end': app.end_date + timedelta(days=1), # FullCalendarの仕様上、終了日は+1日する
+        })
+
+    return JsonResponse(events, safe=False)

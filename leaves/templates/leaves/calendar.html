@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}休暇カレンダー{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="card">
+        <div id='calendar'></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{# FullCalendarライブラリ本体を読み込み #}
+<script src="{% static 'fullcalendar/index.global.min.js' %}"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var calendarEl = document.getElementById('calendar');
+    var calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth', // 月表示
+        locale: 'ja', // 日本語化
+        headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek'
+        },
+        buttonText: { // ボタンのテキストを日本語に
+            today: '今日',
+            month: '月',
+            week: '週',
+        },
+        // ここで先ほど作成したAPIエンドポイントを指定
+        events: "{% url 'leaves:leave_events_api' %}",
+    });
+    calendar.render();
+});
+</script>
+{% endblock %}
