@@ -13,21 +13,23 @@ class BalanceUpdateError(Exception):
 def consume_balance(application: Application):
     """申請で消費される休暇残高を更新する."""
     if application.duration_minutes == 0:
-        return # 消費する時間がない場合は何もしない
+        return
 
     try:
         fiscal_year = application.start_date.year
         balance, _ = LeaveBalance.objects.get_or_create(
-            user=application.applicant,
-            year=fiscal_year,
+            user=application.applicant, year=fiscal_year
         )
-        # 休暇タイプにより更新フィールドを分ける
+        
+        # ▼ 修正: 休暇タイプに応じて更新するフィールドを分ける ▼
         balance.used_minutes += application.duration_minutes
+        
         if application.leave_type in [Application.LeaveType.AM_HALF, Application.LeaveType.PM_HALF]:
             balance.half_leave_used_count += 1
         elif application.leave_type == Application.LeaveType.TIME:
             balance.time_leave_used_minutes += application.duration_minutes
-
+            
+        balance.save()
     except Exception as e:
         raise BalanceUpdateError(f"残高の消費処理に失敗しました: {e}")
 
@@ -49,7 +51,7 @@ def refund_balance(application: Application):
     except Exception as e:
         raise BalanceUpdateError(f"残高の返還処理に失敗しました: {e}")
     
-    
+
 def get_active_balance(user: User) -> LeaveBalance | None:
     """
     ユーザーの現在有効な残高レコードを取得する.

@@ -29,3 +29,4 @@ def count_workdays(start_date: date, end_date: date) -> int:
         current_date += timedelta(days=1)
         
     return workday_count
+
