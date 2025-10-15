@@ -230,6 +230,18 @@ form p {
   margin-bottom: 1.5rem;
 }
 
+.form-errors {
+  background-color: #fce8e6;
+  border: 1px solid #e57373;
+  color: #c62828;
+  padding: 1rem;
+  border-radius: 4px;
+  margin-bottom: 1.5rem;
+}
+.form-errors p {
+  margin: 0;
+}
+
 .messages {
   list-style: none;
   padding: 0;

@@ -216,9 +216,9 @@ def leave_events_api(request):
     color_map = {
         Application.LeaveType.PAID: '#58D68D',      # 有給休暇 
         Application.LeaveType.AM_HALF: '#5DADE2',   # 午前半休 
-        Application.LeaveType.PM_HALF: '#5DADE2',   # 午後休 
-        Application.LeaveType.TIME: '#F5B041',      # 時間休 
-        Application.LeaveType.SPECIAL: '#333333',   # 慶弔休暇
+        Application.LeaveType.PM_HALF: "#ED963A",   # 午後休 
+        Application.LeaveType.TIME: "#9158F9",      # 時間休 
+        Application.LeaveType.SPECIAL: '#333333',   # 無給休暇
     }
 
 

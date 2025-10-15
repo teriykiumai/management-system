@@ -21,7 +21,7 @@ def consume_balance(application: Application):
             user=application.applicant, year=fiscal_year
         )
         
-        # ▼ 修正: 休暇タイプに応じて更新するフィールドを分ける ▼
+        # 休暇タイプに応じて更新するフィールドを分ける
         balance.used_minutes += application.duration_minutes
         
         if application.leave_type in [Application.LeaveType.AM_HALF, Application.LeaveType.PM_HALF]:

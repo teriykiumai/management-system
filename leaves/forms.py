@@ -1,5 +1,8 @@
+from datetime import timedelta, date
+
 from django import forms
-from .models import Application
+
+from .models import Application, Holiday
 
 class ApplicationForm(forms.ModelForm):
     """休暇申請を作成するためのフォーム"""
@@ -26,10 +29,39 @@ class ApplicationForm(forms.ModelForm):
         cleaned_data = super().clean()
         leave_type = cleaned_data.get('leave_type')
         start_date = cleaned_data.get('start_date')
+        end_date = cleaned_data.get('end_date')
 
-        # 半休または時間休の場合、終了日を開始日と同じにする
+        # 1. 開始日と終了日の順序チェック
+        if start_date and end_date and end_date < start_date:
+            raise forms.ValidationError("終了日は開始日より後の日付を選択してください。")
+
+        # 期間内の祝日を一度だけ取得
+        holidays = set(
+            Holiday.objects.filter(holiday_date__range=(start_date, end_date))
+            .values_list('holiday_date', flat=True)
+        )
+        
+        # 終日休暇の場合
+        if leave_type == Application.LeaveType.PAID:
+            # 有給休暇の場合：開始日と終了日のみチェック
+            if start_date.weekday() >= 5 or start_date in holidays:
+                raise forms.ValidationError(f"有給休暇の開始日({start_date.strftime('%Y-%m-%d')})を休日または祝日に設定することはできません。")
+            if end_date.weekday() >= 5 or end_date in holidays:
+                raise forms.ValidationError(f"有給休暇の終了日({end_date.strftime('%Y-%m-%d')})を休日または祝日に設定することはできません。")
+        else:
+            # 有給休暇以外の場合：期間内の全日程をチェック
+            current_date = start_date
+            while current_date <= end_date:
+                if current_date.weekday() >= 5 or current_date in holidays:
+                    leave_type_display_dict = dict(self.fields['leave_type'].choices)
+                    leave_type_display = leave_type_display_dict.get(leave_type, '')
+                    raise forms.ValidationError(
+                        f"{current_date.strftime('%Y-%m-%d')}は休日または祝日のため、「{leave_type_display}」は申請できません。"
+                    )
+                current_date += timedelta(days=1)
+        
+        # 終日休暇でない場合は開始と終了は同じになるはず
         if leave_type in [Application.LeaveType.AM_HALF, Application.LeaveType.PM_HALF, Application.LeaveType.TIME]:
-            if start_date:
-                cleaned_data['end_date'] = start_date
+            cleaned_data['end_date'] = start_date
         
         return cleaned_data
