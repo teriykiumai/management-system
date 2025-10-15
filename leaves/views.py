@@ -87,7 +87,7 @@ def logout_view(request):
 def application_create_view(request):
     """休暇申請の作成ビュー"""
     if request.method == 'POST':
-        form = ApplicationForm(request.POST)
+        form = ApplicationForm(request.POST, user=request.user)
         if form.is_valid():
             try:
                 # ビジネスロジックをサービス関数に委譲
@@ -106,7 +106,7 @@ def application_create_view(request):
                 # e.messageは単一の文字列、e.messagesはリスト
                 messages.error(request, e.message if hasattr(e, 'message') else e.messages[0])
     else:
-        form = ApplicationForm()
+        form = ApplicationForm(user=request.user)
 
     return render(request, 'leaves/application_form.html', {'form': form})
 
@@ -174,6 +174,8 @@ def application_history_view(request):
     # ユーザー自身の申請を、新しいものから順に取得
     applications = Application.objects.filter(
         applicant=request.user
+    ).exclude( # 取り消し申請の取り消しはできないようにするため
+        application_type=Application.ApplicationType.CANCEL
     ).order_by('-created_at')
 
     context = {
@@ -216,9 +218,9 @@ def leave_events_api(request):
     color_map = {
         Application.LeaveType.PAID: '#58D68D',      # 有給休暇 
         Application.LeaveType.AM_HALF: '#5DADE2',   # 午前半休 
-        Application.LeaveType.PM_HALF: '#5DADE2',   # 午後休 
-        Application.LeaveType.TIME: '#F5B041',      # 時間休 
-        Application.LeaveType.SPECIAL: '#333333',   # 慶弔休暇
+        Application.LeaveType.PM_HALF: "#ED963A",   # 午後休 
+        Application.LeaveType.TIME: "#9158F9",      # 時間休 
+        Application.LeaveType.SPECIAL: '#333333',   # 無給休暇
     }
 
 

@@ -9,6 +9,14 @@
         <h3>休暇申請フォーム</h3>
         <form method="post" id="applicationForm">
             {% csrf_token %}
+            {# エラー表示箇所 #}  
+            {% if form.non_field_errors %}
+            <div class="form-errors">
+                {% for error in form.non_field_errors %}
+                    <p>{{ error }}</p>
+                {% endfor %}
+            </div>
+            {% endif %}
             
             {# 休暇種別 #}
             <p>

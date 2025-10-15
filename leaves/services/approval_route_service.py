@@ -71,7 +71,7 @@ def generate_approval_route(applicant_assignment: Assignment) -> List[User]:
                 if approver_role and approver_role.is_approval_endpoint:
                     break
 
-            # ▼ 修正: 申請者より役職レベルが高い承認者のみを追加 ▼
+            # 申請者より役職レベルが高い承認者のみを追加 
             if approver and approver != applicant_assignment.user and approver_role.role_level > applicant_role_level:
                 unique_approvers[approver.pk] = approver
                 

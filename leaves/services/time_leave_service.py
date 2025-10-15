@@ -60,11 +60,9 @@ def calculate_time_leave_minutes(user: User, time_slots_data: List[Dict[str, tim
 def validate_time_leave_request(user: User, post_data: Dict):
     """
     時間休申請に関連する全てのバリデーションを実行する.
-
     Args:
         user (User): 申請者.
         post_data (Dict): request.POSTデータ.
-
     Raises:
         ValidationError: 検証ルールに違反した場合.
     """

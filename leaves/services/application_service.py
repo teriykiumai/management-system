@@ -4,7 +4,8 @@ from django.contrib.auth import get_user_model
 from typing import Dict, Any, Tuple
 
 from leaves.models import Application, Assignment, ApprovalHistory, LeaveBalance
-from leaves.constants import MINUTES_PER_WORK_DAY
+from leaves.constants import MINUTES_PER_WORK_DAY, MINUTES_PER_WORK_HALF_DAY
+
 from .approval_route_service import generate_approval_route
 from .time_leave_service import (
     validate_time_leave_request, 
@@ -22,9 +23,18 @@ class AssignmentError(Exception):
     pass
 
 def _prepare_application_data(applicant: User, form_data: Dict, post_data: Dict) -> Dict[str, Any]: # type: ignore
+    """DBに保存する前の、申請に関連する全てのデータを準備・計算する.
+    Args:
+        applicant (User): 申請者.
+        form_data (Dict): フォームの入力情報の辞書, 開始期間や終了期間、休暇種類をとる.
+        post_data (Dict): 消費時間や承認ルートの情報を含めたオブジェクト.
+    Raises:
+        AssignmentError: _description_
+        AssignmentError: _description_
+    Returns:
+        Dict[str, Any]: 承認者、承認ルート、総消費時間のデータ
     """
-    DBに保存する前の、申請に関連する全てのデータを準備・計算する.
-    """
+    
     # 1. 基本情報を準備
     leave_type = form_data.get('leave_type')
     start_date = form_data.get('start_date')
@@ -43,15 +53,14 @@ def _prepare_application_data(applicant: User, form_data: Dict, post_data: Dict)
     # 消費時間(分)を計算
     duration_minutes = 0
     processed_slots = [] # 時間休の場合の計算済みスロット
-    leave_type = form_data.get('leave_type')
 
     if leave_type == Application.LeaveType.TIME:
         time_slots_data = parse_time_slots(post_data) # time_leave_serviceのヘルパーを一時的に借用
         duration_minutes, processed_slots = calculate_time_leave_minutes(applicant, time_slots_data)
     elif leave_type in [Application.LeaveType.AM_HALF, Application.LeaveType.PM_HALF]:
-        duration_minutes = MINUTES_PER_WORK_DAY // 2
+        duration_minutes = MINUTES_PER_WORK_HALF_DAY
     elif leave_type == Application.LeaveType.PAID:
-        workdays = count_workdays(form_data.get('start_date'), form_data.get('end_date'))
+        workdays = count_workdays(start_date, end_date)
         duration_minutes = workdays * MINUTES_PER_WORK_DAY
 
     return {
@@ -112,10 +121,9 @@ def create_application(applicant: User, form_data: dict, post_data: dict) -> App
     return application
 
 
-def create_cancellation_request(user: User, target_application: Application) -> Application:
+def create_cancellation_request(user: User, target_application: Application) -> Application: # pyright: ignore[reportInvalidTypeForm]
     """
     承認済みの休暇申請に対する取消申請を作成する.
-
     Args:
         user (User): 取消を申請するユーザー.
         target_application (Application): 取り消しの対象となる、承認済みの申請.
@@ -129,6 +137,8 @@ def create_cancellation_request(user: User, target_application: Application) -> 
         raise PermissionError("自分の申請しか取り消せません。")
     if target_application.status != Application.Status.APPROVED:
         raise ValueError("承認済みの申請しか取り消せません。")
+    if target_application.application_type == Application.ApplicationType.CANCEL:
+        raise ValueError("取消申請をさらに取り消すことはできません。")
     
     # 既に同じ申請に対する未完了の取消申請があればエラー
     if Application.objects.filter(

@@ -5,5 +5,9 @@
             "extensionName": ".css",
             "savePath": "/static/css"
         }
+    ],
+    "cSpell.words": [
+        "dateutil",
+        "relativedelta"
     ]
 }

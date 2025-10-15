@@ -33,3 +33,17 @@ textarea {
 form p {
     margin-bottom: $spacing-unit * 1.5;
 }
+
+// フォーム全体のエラーメッセージ
+.form-errors {
+    background-color: #fce8e6;
+    border: 1px solid #e57373;
+    color: $error-color;
+    padding: 1rem;
+    border-radius: $border-radius;
+    margin-bottom: 1.5rem;
+
+    p {
+        margin: 0;
+    }
+}
