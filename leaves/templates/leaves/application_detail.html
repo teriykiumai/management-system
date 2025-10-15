@@ -72,7 +72,7 @@
     {% endif %}
 
     {% comment %} 承認済みの申請に対して {% endcomment %}
-    {% if application.status == 'APPROVED' and application.applicant == user %}
+    {% if application.status == 'APPROVED' and application.applicant == user and application.application_type != 'CANCEL' %}
     <div class="card">
         <h3>取消申請</h3>
         <p>この承認済みの休暇申請を取り消しますか？<br><small>（この申請は、再度通常の承認フローを経て承認される必要があります）</small></p>

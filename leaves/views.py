@@ -174,6 +174,8 @@ def application_history_view(request):
     # ユーザー自身の申請を、新しいものから順に取得
     applications = Application.objects.filter(
         applicant=request.user
+    ).exclude( # 取り消し申請の取り消しはできないようにするため
+        application_type=Application.ApplicationType.CANCEL
     ).order_by('-created_at')
 
     context = {

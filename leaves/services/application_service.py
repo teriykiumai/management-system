@@ -137,6 +137,8 @@ def create_cancellation_request(user: User, target_application: Application) -> 
         raise PermissionError("自分の申請しか取り消せません。")
     if target_application.status != Application.Status.APPROVED:
         raise ValueError("承認済みの申請しか取り消せません。")
+    if target_application.application_type == Application.ApplicationType.CANCEL:
+        raise ValueError("取消申請をさらに取り消すことはできません。")
     
     # 既に同じ申請に対する未完了の取消申請があればエラー
     if Application.objects.filter(
