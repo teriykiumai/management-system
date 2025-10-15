@@ -44,8 +44,23 @@ def refund_balance(application: Application):
             user=application.applicant,
             year=fiscal_year
         )
+        
+        # 合計時間を減算
         balance.used_minutes -= application.duration_minutes
+        
+        # 休暇タイプに応じて、半休または時間休のカウンターも減算
+        if application.leave_type in [Application.LeaveType.AM_HALF, Application.LeaveType.PM_HALF]:
+            balance.half_leave_used_count -= 1
+        elif application.leave_type == Application.LeaveType.TIME:
+            balance.time_leave_used_minutes -= application.duration_minutes
+        
+        # 0未満にならないように念のためチェック
+        balance.used_minutes = max(0, balance.used_minutes)
+        balance.half_leave_used_count = max(0, balance.half_leave_used_count)
+        balance.time_leave_used_minutes = max(0, balance.time_leave_used_minutes)
+        
         balance.save()
+
     except LeaveBalance.DoesNotExist:
         raise BalanceUpdateError("返還対象の残高レコードが見つかりません。")
     except Exception as e:
