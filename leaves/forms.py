@@ -18,6 +18,7 @@ class ApplicationForm(forms.ModelForm):
         }
         
     def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None) # viewから渡ってきたuser
         super().__init__(*args, **kwargs)
         self.fields['leave_type'].label = "休暇種別"
         self.fields['start_date'].label = "開始日"
@@ -41,7 +42,7 @@ class ApplicationForm(forms.ModelForm):
             .values_list('holiday_date', flat=True)
         )
         
-        # 終日休暇の場合
+        # 2. 休暇申請日に所定休日が含まれるかの確認
         if leave_type == Application.LeaveType.PAID:
             # 有給休暇の場合：開始日と終了日のみチェック
             if start_date.weekday() >= 5 or start_date in holidays:
@@ -59,6 +60,40 @@ class ApplicationForm(forms.ModelForm):
                         f"{current_date.strftime('%Y-%m-%d')}は休日または祝日のため、「{leave_type_display}」は申請できません。"
                     )
                 current_date += timedelta(days=1)
+
+        # 3. すでに承認済み or ほかの申請で同じ日程で申請しようとしていないか確認, (終日休暇が存在しているか)
+        if self.user:
+            conflicting_statuses = [Application.Status.APPLYING, Application.Status.APPROVED]
+            
+            # 申請期間が重複する既存の申請を取得
+            overlapping_apps = Application.objects.filter(
+                applicant=self.user,
+                status__in=conflicting_statuses,
+                start_date__lte=end_date,
+                end_date__gte=start_date
+            )
+
+            if overlapping_apps.exists():
+                is_new_app_full_day = (leave_type == Application.LeaveType.PAID)
+                
+                # 既存の申請に一つでも終日の有給休暇が含まれているか
+                has_existing_full_day_app = overlapping_apps.filter(leave_type=Application.LeaveType.PAID).exists()
+
+                # バリデーション1: 今回の申請か、既存の申請のどちらかが終日有給の場合 -> 即エラー
+                if is_new_app_full_day or has_existing_full_day_app:
+                    raise forms.ValidationError(
+                        "指定された期間には、他の休暇（または終日の有給休暇）が既に存在します。"
+                    )
+                
+                # 新規申請が半休の場合のみ
+                if leave_type in [Application.LeaveType.AM_HALF, Application.LeaveType.PM_HALF]:
+                    # 重複している既存申請の中に、同じ種類の半休がないかチェック
+                    if overlapping_apps.filter(leave_type=leave_type).exists():
+                        leave_type_display = dict(self.fields['leave_type'].choices).get(leave_type)
+                        raise forms.ValidationError(
+                            f"指定された日には、既に同じ「{leave_type_display}」が申請されています。"
+                        )
+                
         
         # 終日休暇でない場合は開始と終了は同じになるはず
         if leave_type in [Application.LeaveType.AM_HALF, Application.LeaveType.PM_HALF, Application.LeaveType.TIME]:

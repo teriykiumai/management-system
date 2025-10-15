@@ -87,7 +87,7 @@ def logout_view(request):
 def application_create_view(request):
     """休暇申請の作成ビュー"""
     if request.method == 'POST':
-        form = ApplicationForm(request.POST)
+        form = ApplicationForm(request.POST, user=request.user)
         if form.is_valid():
             try:
                 # ビジネスロジックをサービス関数に委譲
@@ -106,7 +106,7 @@ def application_create_view(request):
                 # e.messageは単一の文字列、e.messagesはリスト
                 messages.error(request, e.message if hasattr(e, 'message') else e.messages[0])
     else:
-        form = ApplicationForm()
+        form = ApplicationForm(user=request.user)
 
     return render(request, 'leaves/application_form.html', {'form': form})
 
