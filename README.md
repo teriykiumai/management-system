@@ -5,7 +5,7 @@ djago勉強のためのレポジトリ
 
 ### 1.1. 背景・目的
 
-Djangoを用いたWebアプリケーションに移行する。申請・承認プロセスを備えた、休暇取得状況の可知化、管理業務の効率化を実現する。
+Djangoを用いたWebアプリケーショを作成。申請・承認プロセスを備えた、休暇申請アプリを作成する。
 
 ### 1.2. システムの範囲
 * 社員による休暇申請から、多段階の承認フローを経て最終承認されるまでのプロセスを管理する。
@@ -37,8 +37,6 @@ Djangoを用いたWebアプリケーションに移行する。申請・承認�
 * 業務部・勤怠管理担当 => 最終承認者 (FINAL approver)
 * 経営層 (業務部長、常務、社長等) => 最終承認者代理 (FINAL DelegateApprover)
 
-> **Note (兼務への対応):** ユーザーが複数の部署や役職を兼務するケースに対応するため、ユーザーと所属・役職を個別に管理するデータ構造とします。（詳細は「5. データ設計」を参照）
-> 申請者は、申請時にどの所属の立場で申請を行うかを選択し、それに基づいて承認ルートが決定されます。
 
 ### 2.3. ユーザー権限
 | 役割 | できること |
@@ -54,8 +52,8 @@ Djangoを用いたWebアプリケーションに移行する。申請・承認�
 
 ### 3.1. 認証 (Authentication)
 * **本番認証**: MSAL (Microsoft Authentication Library) と連携したシングルサインオン（SSO）で本人確認を行う。
-    * 初回ログイン時、IDトークンの`name`, `preferred_username`を元に、利用許可リストと照合後、`users`テーブルに自動登録（プロビジョニング）する。
-    * `name`クレームが `"ローマ字名/日本語名"` 形式の場合、日本語名をパースして姓・名に分割する。
+    * 初回ログイン時、IDトークンの`name`, `preferred_username`を元に、利用許可リストと照合後、`users`テーブルに自動登録（プロビジョニング）する。
+    * `name`クレームが `"ローマ字名/日本語名"` 形式の場合、日本語名をパースして姓・名に分割する。
 * **開発用認証**: `DEBUG=True`の場合のみ、パスワード不要で任意のユーザーとしてログインできるモックログイン機能を提供する。
 
 ### 3.2. ダッシュボード機能
@@ -67,14 +65,14 @@ Djangoを用いたWebアプリケーションに移行する。申請・承認�
 ### 3.3.1. 休暇申請機能
 
 * **申請フォーム**:
-    * 休暇種別、期間、理由等を入力して申請する。
-    * 半休・時間休を選択した場合、終了日フィールドは非表示になり、開始日と同日に自動設定される。
+    * 休暇種別、期間、理由等を入力して申請する。
+    * 半休・時間休を選択した場合、終了日フィールドは非表示になり、開始日と同日に自動設定される。
 * **時間休専用UI**:
-    * 休暇種別で「時間休」を選択した場合、動的に時間帯（開始・終了時刻）入力欄を追加・削除できる。
-    * 時間入力は30分刻みのドロップダウン（`%H:%m`）の文字列形式で選択する、1時間以上の差分が必要。
+    * 休暇種別で「時間休」を選択した場合、動的に時間帯（開始・終了時刻）入力欄を追加・削除できる。
+    * 時間入力は30分刻みのドロップダウン（`%H:%m`）の文字列形式で選択する、1時間以上の差分が必要。
 * **事前バリデーション**:
-    * 申請ボタン押下時に、まずJavaScriptで入力内容（日付の前後関係など）をチェックし、不備があればエラーを表示する。
-    * 入力内容に問題がない場合のみ、申請内容のサマリーを含む確認モーダル（SweetAlert2）を表示する。
+    * 申請ボタン押下時に、まずJavaScriptで入力内容（日付の前後関係など）をチェックし、不備があればエラーを表示する。
+    * 入力内容に問題がない場合のみ、申請内容のサマリーを含む確認モーダル（SweetAlert2）を表示する。
 
 #### 3.3.2. 申請・取消に関する制約
 
@@ -96,9 +94,9 @@ Djangoを用いたWebアプリケーションに移行する。申請・承認�
 
 * 承認者は、自身に提出された承認待ちの申請を一覧で確認できる。
 * 申請詳細画面で「承認」「差し戻し」「却下」のアクションを実行できる。
-    * **承認**: 申請は次の承認者へエスカレーションされる。承認時のコメント機能は不要。
-    * **差し戻し**: 修正依頼のコメントを添えて、申請者に差し戻す。(メールもしくはTeams通知)
-    * **却下**: 却下理由を添えて、申請者に通知する。(メールもしくはTeams通知)
+    * **承認**: 申請は次の承認者へエスカレーションされる。承認時のコメント機能は不要。
+    * **差し戻し**: 修正依頼のコメントを添えて、申請者に差し戻す。(メールもしくはTeams通知)
+    * **却下**: 却下理由を添えて、申請者に通知する。(メールもしくはTeams通知)
 * 差し戻し・却下の際は、コメントの入力が必須となる（フロントエンド・バックエンド両方でチェック）。
 * 各アクション実行前には、確認モーダル（SweetAlert2）が表示される。
 
@@ -112,20 +110,20 @@ Djangoを用いたWebアプリケーションに移行する。申請・承認�
 
 * **承認前の申請**: 申請者本人が詳細画面から即時取り消し可能。
 * **承認済みの申請**:
-    * 承認済み休暇（**管理者によって設定された一斉有給取得日を含む**）に対して、ユーザーは「取消申請」を行うことができる。
-    * この取消申請は、**元の休暇申請と同じ承認ルート**で、再度承認フローにかけられる。
-    * 取消申請が最終承認されるまで、元の休暇申請のステータスは「承認済」のまま維持される。
-    * 取消申請が最終承認された時点で、元の休暇申請のステータスが「取り消し済」に変更され、休暇残高が再計算される。
-    * 取消申請が差し戻し・却下された場合、元の休暇申請は「承認済」のままとなる。
-    * 最終承認されて初めて元の休暇が取り消され、残高が元に戻る。
+    * 承認済み休暇（**管理者によって設定された一斉有給取得日を含む**）に対して、ユーザーは「取消申請」を行うことができる。
+    * この取消申請は、**元の休暇申請と同じ承認ルート**で、再度承認フローにかけられる。
+    * 取消申請が最終承認されるまで、元の休暇申請のステータスは「承認済」のまま維持される。
+    * 取消申請が最終承認された時点で、元の休暇申請のステータスが「取り消し済」に変更され、休暇残高が再計算される。
+    * 取消申請が差し戻し・却下された場合、元の休暇申請は「承認済」のままとなる。
+    * 最終承認されて初めて元の休暇が取り消され、残高が元に戻る。
 
 
 ### 3.8.1. 管理者機能（Django Admin）
 * **モデル管理**: 各種マスターデータ（部署、グループ、チーム、役職など）を管理。
 * **フィルター**: `Application`, `User`, `Assignment`, `LeaveBalance`などの主要なテーブルで、部署・グループ・年度などで絞り込み表示が可能。
 * **カスタムアクション**:
-    * **強制承認/却下**: `Application`一覧から、承認フローを無視して申請を完了させることができる。
-    * **一斉申請作成**: `CompanyLeaveDay`一覧から、対象日を選択して全社員分の休暇申請を一括作成できる。
+    * **強制承認/却下**: `Application`一覧から、承認フローを無視して申請を完了させることができる。
+    * **一斉申請作成**: `CompanyLeaveDay`一覧から、対象日を選択して全社員分の休暇申請を一括作成できる。
 * **連動削除**: `CompanyLeaveDay`を削除すると、関連する休暇申請も自動で削除され、消費された残高も元に戻る。
 
 
@@ -157,48 +155,48 @@ Djangoを用いたWebアプリケーションに移行する。申請・承認�
 ### 4.1. 承認フロー
 
 * **構造的ルート生成**:
-    申請者の所属情報（`Assignment`）に基づき、「所属チームのリーダー」→「所属グループの長」→「所属部署の長」→「固定の最終承認者」という順で、組織階層を辿って承認ルートを動的に生成する。
+    申請者の所属情報（`Assignment`）に基づき、「所属チームのリーダー」→「所属グループの長」→「所属部署の長」→「固定の最終承認者」という順で、組織階層を辿って承認ルートを動的に生成する。
 * **自動代理承認**:
-    本来の承認者が不在（承認日に休暇取得済みなど）の場合、`Role`マスターで定義された代理役職者へ自動的に承認者が切り替わる。代理も不在の場合はそのステップはスキップされる。
+    本来の承認者が不在（承認日に休暇取得済みなど）の場合、`Role`マスターで定義された代理役職者へ自動的に承認者が切り替わる。代理も不在の場合はそのステップはスキップされる。
 * **終点ロジック**:
-    上長を辿るプロセスは、`Role`マスターで`is_approval_endpoint=True`が設定された役職（幹部クラス）に到達した時点で停止する。その後、固定の最終承認者（業務部）がルートに追加される。
+    上長を辿るプロセスは、`Role`マスターで`is_approval_endpoint=True`が設定された役職（幹部クラス）に到達した時点で停止する。その後、固定の最終承認者（業務部）がルートに追加される。
 
 * **終点ロジック**: 承認ルートが特定の役職（`roles`の終端）に達した後は、固定の承認者（業務部・勤怠管理担当）に引き継がれる。
 * **差し戻し後の再開**: 差し戻された申請が再提出された場合、差し戻しを行った承認者から承認が再開される。
 * **通知**:
-  *  各承認ステップで承認が行われるたびに、次の承認者へ通知が送られる。（メール or Teams）
-  *  最終承認が行われた際に申請者に通知メールを送付する。
+    *  各承認ステップで承認が行われるたびに、次の承認者へ通知が送られる。（メール or Teams）
+    *  最終承認が行われた際に申請者に通知メールを送付する。
 
 ### 4.2. 休暇日数の計算ルール
 
 * **管理単位**: 休暇残高はすべて**分単位**の整数(`INTEGER`)で管理し、計算誤差を防ぐ。1日は8時間(480分)とし、**午前・午後半休は実際の取得時間ではなく一律4時間（240分）として計算する。**
 * **休日除外**: 個人が複数日にまたがる休暇を申請する際、その期間に含まれる土日祝日は、有給消化日数から自動的に除外されます。なお、管理者によって設定された一斉有給取得日は、全社的に有給を消化する日であり、個人の申請とは別に扱われます。
 * **年間付与**:
-    * 毎年12月16日を年度開始日とし、有給休暇を付与する。
-    * 付与日数は**勤続年数（12/16時点での満勤続年数）**により変動し、ロジックは以下の通り。ただし、**年間最大20日**を上限とする。
-        * 勤続年数1年の申請者には**10日**, 2年目の申請者には**11日**
-        * 勤続年数が3年以上の申請者には以下の計算式が適応される。
-            * `10日 + 2日 * (勤続年数 - 2))`
-            * 例：勤続8年目の場合: `$10 + 2 * (8-2) = 22$`日となるが、上限`20`日が適用される。
+    * 毎年12月16日を年度開始日とし、有給休暇を付与する。
+    * 付与日数は**勤続年数（12/16時点での満勤続年数）**により変動し、ロジックは以下の通り。ただし、**年間最大20日**を上限とする。
+        * 勤続年数1年の申請者には**10日**, 2年目の申請者には**11日**
+        * 勤続年数が3年以上の申請者には以下の計算式が適応される。
+            * `10日 + 2日 * (勤続年数 - 2))`
+            * 例：勤続8年目の場合: `$10 + 2 * (8-2) = 22$`日となるが、上限`20`日が適用される。
 * **半日休暇**
-    * 午前・午後半休は年度毎に最大**6日分**(12回)まで取得可能。利用実績は`leave_balance.half_leave_used_count`に記録されます。
+    * 午前・午後半休は年度毎に最大**6日分**(12回)まで取得可能。利用実績は`leave_balance.half_leave_used_count`に記録されます。
 * **時間休**:
-    * 就業規則に則り年度ごとに最大**8時間**まで取得可能。有給休暇の総残高の中から時間休として休暇が取得され、その利用実績は `leave_balance.time_leave_used_minutes` に分単位で記録される。有給残高から時間休枠へ残高を変換する処理は行わない。
-    * 年度ごとの最大時間（`system_settings`テーブルで管理）は今後変更される可能性がある。例：8時間->40時間まで拡大
-        * 最大時間が拡大されたとしても、その都度1日分を8時間(480分)として換算する事とする。
+    * 就業規則に則り年度ごとに最大**8時間**まで取得可能。有給休暇の総残高の中から時間休として休暇が取得され、その利用実績は `leave_balance.time_leave_used_minutes` に分単位で記録される。有給残高から時間休枠へ残高を変換する処理は行わない。
+    * 年度ごとの最大時間（`system_settings`テーブルで管理）は今後変更される可能性がある。例：8時間->40時間まで拡大
+        * 最大時間が拡大されたとしても、その都度1日分を8時間(480分)として換算する事とする。
 * **繰り越し規定**:
-    * 年度更新時（毎年12/16のバッチ処理）、未消化の有給は最大**20日**分まで翌年度に繰り越し可能。
-    * 保有上限は**40日**分とし、超過分は切り捨てられる。※(この超過分には時間休に使用される**分単位**の時間も含まれる)
-        * 「前年度からの繰り越し分（最大20日）と、当該年度の新規付与分（最大20日）」の合計が40日を超えない
+    * 年度更新時（毎年12/16のバッチ処理）、未消化の有給は最大**20日**分まで翌年度に繰り越し可能。
+    * 保有上限は**40日**分とし、超過分は切り捨てられる。※(この超過分には時間休に使用される**分単位**の時間も含まれる)
+        * 「前年度からの繰り越し分（最大20日）と、当該年度の新規付与分（最大20日）」の合計が40日を超えない
 * **休暇種別と残高の連動**:
-    | 休暇種別 | 消費される残高 | 備考 |
-    | :--- | :--- | :--- |
-    | 有給休暇, 午前半休, 午後半休 | 有給残高 | 日数または時間数を分に換算して減算 |
-    | 時間休暇 | **有給残高** | **年間利用上限の対象** |
-    | 慶弔休暇, 育児休暇, 介護休暇, 病欠, 欠勤, **その他休暇** | (なし) | これらは無給休暇として扱われ、残高には影響しない |
+    | 休暇種別 | 消費される残高 | 備考 |
+    | :--- | :--- | :--- |
+    | 有給休暇, 午前半休, 午後半休 | 有給残高 | 日数または時間数を分に換算して減算 |
+    | 時間休暇 | **有給残高** | **年間利用上限の対象** |
+    | 慶弔休暇, 育児休暇, 介護休暇, 病欠, 欠勤, **その他休暇** | (なし) | これらは無給休暇として扱われ、残高には影響しない |
 * **取り消し時の残高再計算**:
-    * 承認済みの申請が取り消された場合、対象休暇を消化するはずだった年度の `leave_balance.used_minutes` を減算して残高を元に戻す。
-    * 対象休暇を取り消し残高を戻した際、年度の保有上限（40日相当）を超える場合は、**超過分は切り捨てられる。**
+    * 承認済みの申請が取り消された場合、対象休暇を消化するはずだった年度の `leave_balance.used_minutes` を減算して残高を元に戻す。
+    * 対象休暇を取り消し残高を戻した際、年度の保有上限（40日相当）を超える場合は、**超過分は切り捨てられる。**
 
 #### 4.2.1. 年度をまたぐ申請の計算ロジック
 
@@ -206,13 +204,13 @@ Djangoを用いたWebアプリケーションに移行する。申請・承認�
 
 1.  **休暇日ごとの所属年度を判定**: 申請された期間の1日ずつについて、現年度（〜12/15）か来年度（12/16〜）かを判定する。
 2.  **未来年度の「予測残高」を算出**: 来年度に属する休暇日がある場合、申請時点での来年度の予測残高をメモリ上で計算する。
-    * `予測繰越日数` = `(現年度の残高 - 現年度で取得予定の休暇日数)` を、繰越上限(20日)を上限として算出。
-    * `来年度の新規付与日数` = 12/16時点の勤続年数から算出。
-    * `来年度の予測残高` = `予測繰越日数` + `来年度の新規付与日数`
+    * `予測繰越日数` = `(現年度の残高 - 現年度で取得予定の休暇日数)` を、繰越上限(20日)を上限として算出。
+    * `来年度の新規付与日数` = 12/16時点の勤続年数から算出。
+    * `来年度の予測残高` = `予測繰越日数` + `来年度の新規付与日数`
 3.  **年度ごとに残高を検証**:
-    * 現年度に属する休暇日は、**現在の残高**で足りるか検証する。
-    * 来年度に属する休暇日は、**上記で算出した「予測残高」**で足りるか検証する。
-    * 全ての検証をクリアした場合のみ、申請を許可する。承認後は、各休暇日が属する年度の`leave_balance`テーブルの`used_minutes`がそれぞれ更新される。
+    * 現年度に属する休暇日は、**現在の残高**で足りるか検証する。
+    * 来年度に属する休暇日は、**上記で算出した「予測残高」**で足りるか検証する。
+    * 全ての検証をクリアした場合のみ、申請を許可する。承認後は、各休暇日が属する年度の`leave_balance`テーブルの`used_minutes`がそれぞれ更新される。
 
 ### 4.3. 初年度、年度途中の入社者の付与ルール
 
@@ -231,45 +229,45 @@ Djangoを用いたWebアプリケーションに移行する。申請・承認�
 
 * **複数時間帯の合算**: 1回の申請で入力された複数の時間帯を合算して、その日の合計取得時間とする。
 * **休憩時間の自動除外**: 申請された取得時間帯から、重複する休憩時間を自動的に減算する。適用される休憩時間は、以下の優先順位で決定される。
-    1.  **個人設定（最優先）**: `break_times`テーブルに、申請者個人の`user_id`に紐づく休憩時間設定が存在する場合、それを適用する。
-    2.  **部署設定**: 個人の設定が存在しない場合、申請者の所属部署（`assignment.department_id`）に紐づく休憩時間設定を検索し、存在すれば適用する。
-    3.  **全社共通設定**: 個人および部署の設定も存在しない場合、全社共通の休憩時間設定（`break_times`テーブルで`user_id`と`department_id`が共にNULLのレコード）を適用する。
+    1.  **個人設定（最優先）**: `break_times`テーブルに、申請者個人の`user_id`に紐づく休憩時間設定が存在する場合、それを適用する。
+    2.  **部署設定**: 個人の設定が存在しない場合、申請者の所属部署（`assignment.department_id`）に紐づく休憩時間設定を検索し、存在すれば適用する。
+    3.  **全社共通設定**: 個人および部署の設定も存在しない場合、全社共通の休憩時間設定（`break_times`テーブルで`user_id`と`department_id`が共にNULLのレコード）を適用する。
 * **計算例**: 適用される休憩時間が12:00-13:00の時、`11:30〜13:30`の2時間で申請された場合、休憩時間の1時間が除外され、取得時間は`1時間`として計算される。
 * **手動調整**: 自動計算によって算出された休憩時間は、従業員の事情（休憩シフト等）に合わせて手動で修正可能とする。
 
 ### 4.5. 一斉有給取得日の処理ロジック
 
 * **登録処理**: 管理者が一斉有給取得日を登録すると、以下のバッチ処理が実行される。
-    1.  全有効ユーザー（`users.is_active = True`）を対象とする。
-    2.  対象者ごとに、指定された日付で「有給休暇」「承認済」の申請データを`applications`テーブルに自動作成する。
-    3.  各ユーザーの当該年度の`leave_balance.used_minutes`に1日分（480分）を加算する。
+    1.  全有効ユーザー（`users.is_active = True`）を対象とする。
+    2.  対象者ごとに、指定された日付で「有給休暇」「承認済」の申請データを`applications`テーブルに自動作成する。
+    3.  各ユーザーの当該年度の`leave_balance.used_minutes`に1日分（480分）を加算する。
 * **取消処理**: 管理者が一斉有給取得日を取り消す（無効化する）と、以下のバッチ処理が実行される。
-    1.  取消対象日に自動生成された申請データを特定し、ステータスを「取り消し済」に更新する。
-    2.  該当ユーザーの`leave_balance.used_minutes`から1日分（480分）を減算し、残高を元に戻す。
+    1.  取消対象日に自動生成された申請データを特定し、ステータスを「取り消し済」に更新する。
+    2.  該当ユーザーの`leave_balance.used_minutes`から1日分（480分）を減算し、残高を元に戻す。
 * **残高不足処理**: 入社初年度等でまだ休暇が付与されておらず一斉有給取得日の処理が行われた際以下のルールを適応する。
-    1.  休暇種類を有給休暇ではなく無給休暇の`その他休暇`に変更する。
+    1.  休暇種類を有給休暇ではなく無給休暇の`その他休暇`に変更する。
 ### 4.6. 取消申請の承認フロー
 
 * **取消申請の生成**: ユーザーが承認済みの休暇（`app_id: 100`とする）の取消を申請すると、システムは新しい申請レコード（`app_id: 101`）を`applications`テーブルに作成する。
-    * `application_type` は「**取消申請**」となる。
-    * `cancellation_target_id` に、取り消したい元の申請ID（この場合 `100`）を記録する。
-    * `approval_route` には、元の申請（`app_id: 100`）の承認ルートがコピーされる。
-    * ステータスは「申請中」となり、承認フローが開始される。
+    * `application_type` は「**取消申請**」となる。
+    * `cancellation_target_id` に、取り消したい元の申請ID（この場合 `100`）を記録する。
+    * `approval_route` には、元の申請（`app_id: 100`）の承認ルートがコピーされる。
+    * ステータスは「申請中」となり、承認フローが開始される。
 * **承認処理**: 取消申請は、通常の申請と同様に承認者によって「承認」「差し戻し」「却下」される。
 * **最終承認時の処理**: 取消申請が最終承認者に「承認」されると、以下の処理が実行される。
-    1.  取消申請（`app_id: 101`）自体のステータスを「承認済」に更新する。
-    2.  元の休暇申請（`app_id: 100`）のステータスを「**取り消し済**」に更新する。
-    3.  元の休暇申請（`app_id: 100`）で消化されていた休暇時間分を、対象ユーザーの`leave_balance.used_minutes`から減算し、残高を元に戻す。
+    1.  取消申請（`app_id: 101`）自体のステータスを「承認済」に更新する。
+    2.  元の休暇申請（`app_id: 100`）のステータスを「**取り消し済**」に更新する。
+    3.  元の休暇申請（`app_id: 100`）で消化されていた休暇時間分を、対象ユーザーの`leave_balance.used_minutes`から減算し、残高を元に戻す。
 
 ### 4.7. Azure AD 同期ロジック
 
 * **目的**: Azure ADを「社員の在籍情報を確認するための情報源」とし、アプリのDBを「承認ルートを定義するための情報源」として役割を分担し、セキュリティと運用の柔軟性を両立する。
 * **自動同期処理 (バッチ)**:
-    * システムは定期的に（例：深夜に一度）、アプリ内の全有効ユーザー情報をAzure ADに問い合わせる。
-    * Azure AD上でアカウントが無効化または削除されているユーザーを検知した場合、アプリ内の対応する`users`レコードの`is_active`フラグを自動的に`False`に更新する。
-    * これにより、管理者の手動操作を待たずして、退職者が関わる承認フローの自動スキップ（4.1参照）が機能し、セキュリティリスクを低減する。
+    * システムは定期的に（例：深夜に一度）、アプリ内の全有効ユーザー情報をAzure ADに問い合わせる。
+    * Azure AD上でアカウントが無効化または削除されているユーザーを検知した場合、アプリ内の対応する`users`レコードの`is_active`フラグを自動的に`False`に更新する。
+    * これにより、管理者の手動操作を待たずして、退職者が関わる承認フローの自動スキップ（4.1参照）が機能し、セキュリティリスクを低減する。
 * **手動管理項目**:
-    * 社員の役職、所属、上長（承認者）といったアプリ固有の承認ルートに関わる情報は、Azure ADとは同期せず、アプリの管理者（業務部担当）がDjango Admin等を用いて手動でメンテナンスする。
+    * 社員の役職、所属、上長（承認者）といったアプリ固有の承認ルートに関わる情報は、Azure ADとは同期せず、アプリの管理者（業務部担当）がDjango Admin等を用いて手動でメンテナンスする。
 
 ***
 
@@ -279,301 +277,300 @@ Djangoを用いたWebアプリケーションに移行する。申請・承認�
 
 ```mermaid
 erDiagram
-    User {
-        int id PK
-        string employee_id "社員ID番号"
-        string username "djangoのUserがもともと持つ"
-        string first_name "MSAL_IDトークンのnameから取得"
-        string last_name "MSAL_IDトークンのnameから取得"
-        date hire_date "入社日"
-        string email
-        bool is_active "在籍フラグ"
-    }
-    PreApprovedUser {
-        int id PK
-        string employee_id "社員ID番号"
-        bool is_registered "登録完了フラグ"
-    }
-    Department {
-        int department_id PK
-        string department_name
-    }
-    Group {
-        int group_id PK
-        string group_name
-        int department_id FK
-    }
-    Team {
-        int team_id PK
-        string team_name
-        int group_id FK
-    }
-    Role {
-        int role_id PK
-        string role_name
-        int role_level
-        int deputy_role_id FK "代理役職"
-        string view_scope "カレンダー表示権限"
-        bool is_approval_endpoint "承認ルート終点フラグ"
-    }
-    Assignment {
-        int assignment_id PK
-        int user_id FK
-        int department_id FK
-        int group_id FK
-        int team_id FK
-        int role_id FK
-        string manager_id FK "上長(未使用、将来性のため実装)"
-        bool is_primary "主務フラグ"
-    }
-    LeaveBalance {
-        int user_id PK, FK
-        int year PK
-        int carried_over_minutes "前年持ち越し"
-        int granted_minutes "今年度付与"
-        int used_minutes "合計利用実績"
-        int half_leave_used_count "半休利用実績"
-        int time_leave_used_minutes "時間休利用実績"
-    }
-    Application {
-        int app_id PK
-        int applicant_id FK
-        int applicant_assignment_id FK
-        string application_type "django.TextChoices"
-        int cancellation_target_id FK "取消対象"
-        int company_leave_day_id FK
-        string leave_type "django.TextChoices"
-        date start_date
-        date end_date
-        int duration_minutes "計算後の取得時間(分)"
-        string status "django.TextChoices"
-        string current_approver_id FK
-    }
-    ApprovalHistory {
-        int history_id PK
-        int application_id FK
-        int approver_id FK "処理者"
-        int original_approver_id FK "本来の承認者"
-        string action
-        datetime timestamp
-        string comment
-    }
-    TimeLeaveSlot {
-        int slot_id PK
-        int application_id FK
-        time start_time
-        time end_time
-        int calculated_minutes "計算後の取得時間(分)"
-    }
-    CompanyLeaveDay {
-        int day_id PK
-        date leave_date
-        string description
-        bool is_active "有効フラグ"
-    }
-    SystemSetting {
-        int year PK
-        int time_leave_limit_minutes
-    }
-    Holiday {
-        date holiday_date PK
-        string description
-    }
-    BreakTime {
-        int break_time_id PK
-        int user_id FK
-        int department_id FK
-        time start_time
-        time end_time
-    }
-
-    User ||--o{ Assignment : "has"
-    Department ||--o{ Group : "has"
-    Department ||--o{ Assignment : "belongs to"
-    Department ||--o{ BreakTime : "can have"
-    Group ||--o{ Team : "has"
-    Group ||--o{ Assignment : "belongs to"
-    Team ||--o{ Assignment : "belongs to"
-    Role ||--o{ Assignment : "assigned"
-    Role }o--o| Role : "deputy"
-    User ||--o{ LeaveBalance : "has"
-    User ||--o{ Application : "applies"
-    User }o--o{ Assignment : "is manager of"
-    User }o--o{ Application : "is current approver of"
-    User ||--o{ ApprovalHistory : "is approver"
-    User ||--o{ ApprovalHistory : "is original approver"
-    User }o--o{ BreakTime : "can have"
-    Assignment ||--o{ Application : "at time of"
-    Application ||--o{ ApprovalHistory : "has"
-    Application ||--o{ TimeLeaveSlot : "has"
-    Application }o--o| Application : "cancels"
-    CompanyLeaveDay }o--o| Application : "is for"
+    User {
+        int id PK
+        string employee_id "社員ID番号"
+        string username "djangoのUserがもともと持つ"
+        string first_name "MSAL_IDトークンのnameから取得"
+        string last_name "MSAL_IDトークンのnameから取得"
+        date hire_date "入社日"
+        string email
+        bool is_active "在籍フラグ"
+    }
+    PreApprovedUser {
+        int id PK
+        string employee_id "社員ID番号"
+        bool is_registered "登録完了フラグ"
+    }
+    Department {
+        int department_id PK
+        string department_name
+    }
+    Group {
+        int group_id PK
+        string group_name
+        int department_id FK
+    }
+    Team {
+        int team_id PK
+        string team_name
+        int group_id FK
+    }
+    Role {
+        int role_id PK
+        string role_name
+        int role_level
+        int deputy_role_id FK "代理役職"
+        string view_scope "カレンダー表示権限"
+        bool is_approval_endpoint "承認ルート終点フラグ"
+    }
+    Assignment {
+        int assignment_id PK
+        int user_id FK
+        int department_id FK
+        int group_id FK
+        int team_id FK
+        int role_id FK
+        string manager_id FK "上長(未使用、将来性のため実装)"
+        bool is_primary "主務フラグ"
+    }
+    LeaveBalance {
+        int user_id PK, FK
+        int year PK
+        int carried_over_minutes "前年持ち越し"
+        int granted_minutes "今年度付与"
+        int used_minutes "合計利用実績"
+        int half_leave_used_count "半休利用実績"
+        int time_leave_used_minutes "時間休利用実績"
+    }
+    Application {
+        int app_id PK
+        int applicant_id FK
+        int applicant_assignment_id FK
+        string application_type "django.TextChoices"
+        int cancellation_target_id FK "取消対象"
+        int company_leave_day_id FK
+        string leave_type "django.TextChoices"
+        date start_date
+        date end_date
+        int duration_minutes "計算後の取得時間(分)"
+        string status "django.TextChoices"
+        string current_approver_id FK
+    }
+    ApprovalHistory {
+        int history_id PK
+        int application_id FK
+        int approver_id FK "処理者"
+        int original_approver_id FK "本来の承認者"
+        string action
+        datetime timestamp
+        string comment
+    }
+    TimeLeaveSlot {
+        int slot_id PK
+        int application_id FK
+        time start_time
+        time end_time
+        int calculated_minutes "計算後の取得時間(分)"
+    }
+    CompanyLeaveDay {
+        int day_id PK
+        date leave_date
+        string description
+        bool is_active "有効フラグ"
+    }
+    SystemSetting {
+        int year PK
+        int time_leave_limit_minutes
+    }
+    Holiday {
+        date holiday_date PK
+        string description
+    }
+    BreakTime {
+        int break_time_id PK
+        int user_id FK
+        int department_id FK
+        time start_time
+        time end_time
+    }
+    User ||--o{ Assignment : "has"
+    Department ||--o{ Group : "has"
+    Department ||--o{ Assignment : "belongs to"
+    Department ||--o{ BreakTime : "can have"
+    Group ||--o{ Team : "has"
+    Group ||--o{ Assignment : "belongs to"
+    Team ||--o{ Assignment : "belongs to"
+    Role ||--o{ Assignment : "assigned"
+    Role }o--o| Role : "deputy"
+    User ||--o{ LeaveBalance : "has"
+    User ||--o{ Application : "applies"
+    User }o--o{ Assignment : "is manager of"
+    User }o--o{ Application : "is current approver of"
+    User ||--o{ ApprovalHistory : "is approver"
+    User ||--o{ ApprovalHistory : "is original approver"
+    User }o--o{ BreakTime : "can have"
+    Assignment ||--o{ Application : "at time of"
+    Application ||--o{ ApprovalHistory : "has"
+    Application ||--o{ TimeLeaveSlot : "has"
+    Application }o--o| Application : "cancels"
+    CompanyLeaveDay }o--o| Application : "is for"
 ```
 
 ### 5.2. テーブル定義
 
-  * **Users**: 社員情報。Azure_ADから割り当てられているトークン要素**`preferred_username`を社員ID番号**とし、アプリケーション内の`employee_id`とマッピングする。在籍状況(`is_active`)はAzure ADと定期的に同期される。
-  * **PreApprovedUsers**: アプリケーションの利用を許可する社員の**社員ID番号**を事前に登録しておくためのマスターテーブル。管理者がCSVインポートなどでメンテナンスする。`is_registered`フラグで、初回ログインによる`users`テーブルへの登録が完了したかを管理する。
-  * **Departments**: 部署マスター。
-  * **Groups**: 部署とチームの中間となるグループ階層。部署に紐づく。
-  * **Teams**: チームマスター。グループに紐づく。
-  * **Assignments**: 所属情報。ユーザーと部署、役職、上長の関係を定義する中間テーブル。これによりユーザーの兼務に対応する。このテーブルは管理者が手動でメンテナンスする。
-  * **Roles**: 役職マスター。役職名と階層レベルを管理。deputyrole_idで役職単位の代理関係を定義する。カレンダーの表示範囲を制御するview_scopeフィールドと、承認ルートの終点を示すis_approval_endpoint
-  * **LeaveBalance**: 年度ごとの休暇残高。(userid, year) の複合主キーで管理。すべての残高を**分単位の整数(INTEGER)**で保持する。有給残高は物理カラムとして持たず、アプリケーション側で (carried_over_minutes + granted_minutes) - used_minutes の計算式を用いて都度算出する。
-  * **Applications**: 休暇申請情報。
-  * **ApprovalHistory**: 承認履歴。original_approver_idで代理承認の事実を記録。
-  * **TimeLeaveSlots**: 時間休で申請された個々の時間帯を格納する。calculated_minutesで、自動計算または手動設定によって確定した取得時間（分）を記録。
-  * **SystemSettings**: 年度ごとのシステム全体の設定を管理。時間休の年間利用上限など、全社共通のルールを保持する。
-  * **CompanyLeaveDays**: 全社一斉の有給取得日を管理するマスターテーブル。is_activeフラグで有効・無効（取消）を管理する。
-  * **Holidays**: 祝日マスター。休暇日数の計算時に、労働日数から除外するために使用する。
-  * **BreakTimes**: 休憩時間マスター。時間休申請時の取得時間から、重複する休憩時間を自動的に除外するために使用する。`department_id`を持つことで部署固有の休憩時間を設定可能とし、NULLの場合は全社共通ルールとして扱う。
+* **Users**: 社員情報。Azure_ADから割り当てられているトークン要素**`preferred_username`を社員ID番号**とし、アプリケーション内の`employee_id`とマッピングする。在籍状況(`is_active`)はAzure ADと定期的に同期される。
+* **PreApprovedUsers**: アプリケーションの利用を許可する社員の**社員ID番号**を事前に登録しておくためのマスターテーブル。管理者がCSVインポートなどでメンテナンスする。`is_registered`フラグで、初回ログインによる`users`テーブルへの登録が完了したかを管理する。
+* **Departments**: 部署マスター。
+* **Groups**: 部署とチームの中間となるグループ階層。部署に紐づく。
+* **Teams**: チームマスター。グループに紐づく。
+* **Assignments**: 所属情報。ユーザーと部署、役職、上長の関係を定義する中間テーブル。これによりユーザーの兼務に対応する。このテーブルは管理者が手動でメンテナンスする。
+* **Roles**: 役職マスター。役職名と階層レベルを管理。deputyrole_idで役職単位の代理関係を定義する。カレンダーの表示範囲を制御するview_scopeフィールドと、承認ルートの終点を示すis_approval_endpoint
+* **LeaveBalance**: 年度ごとの休暇残高。(userid, year) の複合主キーで管理。すべての残高を**分単位の整数(INTEGER)**で保持する。有給残高は物理カラムとして持たず、アプリケーション側で (carried_over_minutes + granted_minutes) - used_minutes の計算式を用いて都度算出する。
+* **Applications**: 休暇申請情報。
+* **ApprovalHistory**: 承認履歴。original_approver_idで代理承認の事実を記録。
+* **TimeLeaveSlots**: 時間休で申請された個々の時間帯を格納する。calculated_minutesで、自動計算または手動設定によって確定した取得時間（分）を記録。
+* **SystemSettings**: 年度ごとのシステム全体の設定を管理。時間休の年間利用上限など、全社共通のルールを保持する。
+* **CompanyLeaveDays**: 全社一斉の有給取得日を管理するマスターテーブル。is_activeフラグで有効・無効（取消）を管理する。
+* **Holidays**: 祝日マスター。休暇日数の計算時に、労働日数から除外するために使用する。
+* **BreakTimes**: 休憩時間マスター。時間休申請時の取得時間から、重複する休憩時間を自動的に除外するために使用する。`department_id`を持つことで部署固有の休憩時間を設定可能とし、NULLの場合は全社共通ルールとして扱う。
 
 ### 5.3. モデル詳細
 
 #### User
 ユーザー情報を格納するモデル。Django標準の`AbstractUser`を継承して拡張しています。MSAL_IDトークンの`preference_username`を社員IDとして利用します。PreApprovedUserのemployee_id_numberと一致するか確認し認証します。
-  - **employee_id**: 社員ID番号。
-  - **hire_date**: 入社日。
-  - **email**: メールアドレス。承認ルートの通知に用いる。
-  - **first_name**: DjangoのAbstractUserテーブルに元々定義されている。
-  - **last_name**: DjangoのAbstractUserテーブルに元々定義されている。
+- **employee_id**: 社員ID番号。
+- **hire_date**: 入社日。
+- **email**: メールアドレス。承認ルートの通知に用いる。
+- **first_name**: DjangoのAbstractUserテーブルに元々定義されている。
+- **last_name**: DjangoのAbstractUserテーブルに元々定義されている。
 
 #### PreApprovedUser
 システムに登録を許可する社員IDを事前にリストアップしておくためのモデルです。
-  - **employee_id**: 登録を許可する社員の社員ID番号。
-  - **is_registered**: この社員IDを持つユーザーが実際に登録されたかどうかを示すフラグ。
+- **employee_id**: 登録を許可する社員の社員ID番号。
+- **is_registered**: この社員IDを持つユーザーが実際に登録されたかどうかを示すフラグ。
 
 #### Department
 部署情報を管理するモデルです。組織構造の最上位に位置します。
-  - **department_id**: 部署を一意に識別するID（主キー）。
-  - **department_name**: 部署名。
+- **department_id**: 部署を一意に識別するID（主キー）。
+- **department_name**: 部署名。
 
 #### Group
 グループ情報を管理するモデル。部署 (`Department`) に所属します。
-  - **group_id**: グループを一意に識別するID（主キー）。
-  - **group_name**: グループ名。
-  - **department**: 所属する部署への外部キー。
+- **group_id**: グループを一意に識別するID（主キー）。
+- **group_name**: グループ名。
+- **department**: 所属する部署への外部キー。
 
 #### Team
 チーム情報を管理するモデル。グループ (`Group`) に所属します。
-  - **team_id**: チームを一意に識別するID（主キー）。
-  - **team_name**: チーム名。
-  - **group**: 所属するグループへの外部キー。
+- **team_id**: チームを一意に識別するID（主キー）。
+- **team_name**: チーム名。
+- **group**: 所属するグループへの外部キー。
 
 #### Role
 役職情報を管理するモデル。承認レベルやカレンダーの表示範囲などを定義します。
-  - **role_id**: 役職ID（主キー）。
-  - **role_name**: 役職名。
-  - **role_level**: 承認ルートを決定するための階層レベル。
-  - **deputy_role**: 代理承認者となる役職への自己参照外部キー。
-  - **view_scope**: この役職を持つユーザーがカレンダーで閲覧できる範囲（チーム、グループ、部署、全社）。
-  - **is_approval_endpoint**: この役職が承認の最終地点であるかを示すフラグ。
+- **role_id**: 役職ID（主キー）。
+- **role_name**: 役職名。
+- **role_level**: 承認ルートを決定するための階層レベル。
+- **deputy_role**: 代理承認者となる役職への自己参照外部キー。
+- **view_scope**: この役職を持つユーザーがカレンダーで閲覧できる範囲（チーム、グループ、部署、全社）。
+- **is_approval_endpoint**: この役職が承認の最終地点であるかを示すフラグ。
 
 #### Assignment
 ユーザーの所属情報を管理するモデルです。ユーザーは複数の部署や役職を兼務できるため、このモデルで関連付けを表現します。
-  - **user**: 対象となるユーザーへの外部キー。
-  - **department, group, team**: 所属する組織単位への外部キー。
-  - **role**: 担当する役職への外部キー。
-  - **manager**: 直属の上長（Userモデル）への外部キー。
-  - **is_primary**: 主務の所属であるかを示すフラグ。
+- **user**: 対象となるユーザーへの外部キー。
+- **department, group, team**: 所属する組織単位への外部キー。
+- **role**: 担当する役職への外部キー。
+- **manager**: 直属の上長（Userモデル）への外部キー。
+- **is_primary**: 主務の所属であるかを示すフラグ。
 
 #### LeaveBalance
 ユーザーごとの年度別休暇残高を管理するモデルです。
-  - **user**: 対象となるユーザーへの外部キー。
-  - **year**: 年度。`user`と合わせてユニークになります。
-  - **carried_over_minutes**: 前年度からの繰越残高（分）。
-  - **granted_minutes**: 当該年度に付与された休暇残高（分）。
-  - **used_minutes**: 当該年度に消費した休暇（分）。
-  - **time_leave_used_minutes**: 当該年度に消費した時間休（分）。
-  - **half_leave_used_count**: 当該年度に取得した半休の回数。
+- **user**: 対象となるユーザーへの外部キー。
+- **year**: 年度。`user`と合わせてユニークになります。
+- **carried_over_minutes**: 前年度からの繰越残高（分）。
+- **granted_minutes**: 当該年度に付与された休暇残高（分）。
+- **used_minutes**: 当該年度に消費した休暇（分）。
+- **time_leave_used_minutes**: 当該年度に消費した時間休（分）。
+- **half_leave_used_count**: 当該年度に取得した半休の回数。
 
 #### CompanyLeaveDay
 全社一斉の休暇取得日を管理するモデルです。
-  - **leave_date**: 休暇日。
-  - **fiscal_year**: 対象年度。
-  - **description**: 休暇の摘要（例：「夏季一斉休暇」）。
+- **leave_date**: 休暇日。
+- **fiscal_year**: 対象年度。
+- **description**: 休暇の摘要（例：「夏季一斉休暇」）。
 
 #### Application
 休暇申請の情報を格納する中心的なモデルです。
-  - **applicant**: 申請者（User）への外部キー。
-  - **applicant_assignment**: 申請時点での申請者の所属情報への外部キー。
-  - **application_type**: 申請の種類（通常、取消、一斉取得）。
-  - **cancellation_target**: 取消申請の場合、対象となる元の申請への自己参照外部キー。
-  - **company_leave_day**: 一斉取得の場合、関連するCompanyLeaveDayへの外部キー。
-  - **leave_type**: 休暇の種類（有給、半休など）。
-  - **start_date, end_date**: 休暇の期間。
-  - **duration_minutes**: 申請の合計時間。
-  - **status**: 申請のステータス（申請中、承認済など）。
-  - **current_approver**: 現在の承認担当者（User）への外部キー。
-  - **approval_route**: 申請時の承認ルート（承認者のリスト）をJSON形式で保存する。
-  - **duration_minutes**: 休暇の消費時間（分）。
+- **applicant**: 申請者（User）への外部キー。
+- **applicant_assignment**: 申請時点での申請者の所属情報への外部キー。
+- **application_type**: 申請の種類（通常、取消、一斉取得）。
+- **cancellation_target**: 取消申請の場合、対象となる元の申請への自己参照外部キー。
+- **company_leave_day**: 一斉取得の場合、関連するCompanyLeaveDayへの外部キー。
+- **leave_type**: 休暇の種類（有給、半休など）。
+- **start_date, end_date**: 休暇の期間。
+- **duration_minutes**: 申請の合計時間。
+- **status**: 申請のステータス（申請中、承認済など）。
+- **current_approver**: 現在の承認担当者（User）への外部キー。
+- **approval_route**: 申請時の承認ルート（承認者のリスト）をJSON形式で保存する。
+- **duration_minutes**: 休暇の消費時間（分）。
 
 #### ApprovalHistory
 申請に対する承認、差し戻し、却下などの履歴を記録するモデルです。
-  - **application**: 対象の申請への外部キー。
-  - **approver**: 処理を行ったユーザーへの外部キー。
-  - **original_approver**: 本来の承認者（代理承認の場合など）への外部キー。
-  - **action**: 行われた処理（承認、差し戻し、却下）。
-  - **comment**: 処理者が残したコメント。
+- **application**: 対象の申請への外部キー。
+- **approver**: 処理を行ったユーザーへの外部キー。
+- **original_approver**: 本来の承認者（代理承認の場合など）への外部キー。
+- **action**: 行われた処理（承認、差し戻し、却下）。
+- **comment**: 処理者が残したコメント。
 
 #### TimeLeaveSlot
 時間単位休暇の詳細な時間帯を記録するモデルです。`Application`モデルと1対多の関係になります。
-  - **application**: 対象の申請への外部キー。
-  - **start_time, end_time**: 休暇を取得する具体的な時間帯。
-  - **calculated_minutes**: 計算された取得時間（分）。
+- **application**: 対象の申請への外部キー。
+- **start_time, end_time**: 休暇を取得する具体的な時間帯。
+- **calculated_minutes**: 計算された取得時間（分）。
 
 #### SystemSetting
 年度ごとのシステム全体の設定を管理するモデルです。
-  - **year**: 年度（主キー）。
-  - **time_leave_limit_minutes**: 時間休の年間利用上限（分）。
+- **year**: 年度（主キー）。
+- **time_leave_limit_minutes**: 時間休の年間利用上限（分）。
 
 #### Holiday
 カレンダー上の祝日を管理するモデルです。
-  - **holiday_date**: 祝日の日付（主キー）。
-  - **description**: 祝日の名称。
+- **holiday_date**: 祝日の日付（主キー）。
+- **description**: 祝日の名称。
 
 #### BreakTime
 勤務時間から除外される休憩時間を定義するモデルです。全社共通、部署ごと、またはユーザー個人ごとに設定できます。
-  - **user**: 個人設定の場合の対象ユーザーへの外部キー。
-  - **department**: 部署設定の場合の対象部署への外部キー。
-  - **start_time, end_time**: 休憩時間の開始時刻と終了時刻。
+- **user**: 個人設定の場合の対象ユーザーへの外部キー。
+- **department**: 部署設定の場合の対象部署への外部キー。
+- **start_time, end_time**: 休憩時間の開始時刻と終了時刻。
 
 ***
 
 ## 6. システム構成 💻
 
 ### 6.1. 使用技術
-  * **言語**: Python
-  * **Webフレームワーク**: **Django**
-  * **データベース**: Python標準のSQLite3 (開発用)、**PostgreSQL (本番環境推奨)**
-  * **フロントエンド**: **Djangoテンプレートエンジン**を基本とし、部分的な動的処理には**HTMX**を併用。
-  * **CSS** : Sass (SCSS), コンパイルはVisualStudioCode拡張機能の'LiveSassComplier'を利用。
-  * **非同期処理**: Pythonライブラリの**Celery** (メール/Teams通知、一斉有給取得日の指定バッチ処理、Azure AD同期処理など、時間のかかる処理をバックグラウンドで実行)
-  * **ライブラリ**: msal, django-environ, django-widget-tweaks, python-dateutil, SweetAlert2, FullCalendar.js
+* **言語**: Python
+* **Webフレームワーク**: **Django**
+* **データベース**: Python標準のSQLite3 (開発用)、**PostgreSQL (本番環境推奨)**
+* **フロントエンド**: **Djangoテンプレートエンジン**を基本とし、部分的な動的処理には**HTMX**を併用。
+* **CSS** : Sass (SCSS), コンパイルはVisualStudioCode拡張機能の'LiveSassComplier'を利用。
+* **非同期処理**: Pythonライブラリの**Celery** (メール/Teams通知、一斉有給取得日の指定バッチ処理、Azure AD同期処理など、時間のかかる処理をバックグラウンドで実行)
+* **ライブラリ**: msal, django-environ, django-widget-tweaks, python-dateutil, SweetAlert2, FullCalendar.js
 
 ***
 
 ## 7. 非機能要件
 
 ### 7.1. 監査ログ
-  * **目的**: システムのセキュリティとトレーサビリティを確保する。
-  * **対象**: 管理者権限を持つユーザーによる重要なデータへの操作。
-  * **記録内容**: 管理者が「誰が」「いつ」「どのデータに対して」「どのような操作（作成/変更/削除）をしたか」を記録する。
-  * **対象データ例**: `applications`（強制承認/却下）、`company_leave_days`、`pre_approved_users`、`assignments`など。
-  * **実装方針**: Django Adminの標準ログ機能や、`django-simple-history`等の外部ライブラリの活用を検討する。
+* **目的**: システムのセキュリティとトレーサビリティを確保する。
+* **対象**: 管理者権限を持つユーザーによる重要なデータへの操作。
+* **記録内容**: 管理者が「誰が」「いつ」「どのデータに対して」「どのような操作（作成/変更/削除）をしたか」を記録する。
+* **対象データ例**: `applications`（強制承認/却下）、`company_leave_days`、`pre_approved_users`、`assignments`など。
+* **実装方針**: Django Adminの標準ログ機能や、`django-simple-history`等の外部ライブラリの活用を検討する。
 
 ### 7.2 運用環境の制限
-  * 閉じたネットーワーク(ローカルネットワーク内)での運用となるため,SweetAlert2, FullCalendar.js等はmin.js等をローカルにコピーして利用する事。
+* 閉じたネットーワーク(ローカルネットワーク内)での運用となるため,SweetAlert2, FullCalendar.js等はmin.js等をローカルにコピーして利用する事。
 
 ***
 
 ## 8. 運用 🛠️
 ### 7.1. 管理コマンド
-  * **seed_data**: 開発用に、master_dataフォルダの全CSVから初期データを一括登録する。
-  * **update_assignments**: 人事異動時、CSVから所属情報を一括更新する。実行前に自動でバックアップを作成する。
-  * **export_assignments**: 現在の所属情報をCSVにバックアップとして書き出す。
-  * **process_fiscal_year_update**: 年次更新バッチ。年1回（12/16）の定期実行が必要。
-  * **grant_initial_leave**: 初年度付与バッチ。毎日1回の定期実行が必要。
+* **seed_data**: 開発用に、master_dataフォルダの全CSVから初期データを一括登録する。
+* **update_assignments**: 人事異動時、CSVから所属情報を一括更新する。実行前に自動でバックアップを作成する。
+* **export_assignments**: 現在の所属情報をCSVにバックアップとして書き出す。
+* **process_fiscal_year_update**: 年次更新バッチ。年1回（12/16）の定期実行が必要。
+* **grant_initial_leave**: 初年度付与バッチ。毎日1回の定期実行が必要。
 
 ***
 
@@ -589,15 +586,15 @@ erDiagram
 
 ### 9.2 フロントコード規約
 * cssやjsは"project名/app名/static/app名/css"や"project名/app名/static/app名/js"に保存すること
-    * ただし'bsse.css'等はアプリ間で共通する項目は'project名/static/'に保存することと
+    * ただし'bsse.css'等はアプリ間で共通する項目は'project名/static/'に保存することと
 * cssは"scss記法"又は"sass記法"で記述すること。
 * scssに記述するカラーコードやスタイルで共通して仕様する項目は"_constants.scss"等パーシャルファイルに分けて保管する。
 
 ### 9.3 テスト
 
 * **方針**: 
-  * 機能を追加・修正した際は、必ず対応するテストコードを `tests.py` に記述する。
-  * 可能な限りテスト駆動開発(TDD)で行う。必須ではない。
+* 機能を追加・修正した際は、必ず対応するテストコードを `tests.py` に記述する。
+* 可能な限りテスト駆動開発(TDD)で行う。必須ではない。
 
 ---
 
@@ -611,6 +608,6 @@ erDiagram
 ### 10.2 CI (継続的インテグレーション)
 
 * **GitHub Actions** を利用し、プルリクエスト作成時に以下のチェックを自動実行します。
-    1.  コードフォーマット (`Black`)
-    2.  文法チェック (`flake8`)
-    3.  自動テストの実行
+1.  コードフォーマット (`Black`)
+2.  文法チェック (`flake8`)
+3.  自動テストの実行
