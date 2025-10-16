@@ -1,5 +1,6 @@
 from datetime import timedelta
 
+from django.utils import timezone
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import login, get_user_model, logout
@@ -178,8 +179,39 @@ def application_history_view(request):
         application_type=Application.ApplicationType.CANCEL
     ).order_by('-created_at')
 
+    leave_type = request.GET.get('leave_type') or None
+    status = request.GET.get('status') or None
+    year = request.GET.get('year') or None
+    month = request.GET.get('month') or None
+
+    # フィルタ
+    if leave_type:
+        applications = applications.filter(leave_type=leave_type)
+    if status:
+        applications = applications.filter(status=status)
+    if year:
+        applications = applications.filter(start_date__year=year)
+    if month:
+        applications = applications.filter(start_date__month=month)
+
+    # フィルタを適用した結果を最終的に並び替える
+    applications = applications.order_by('-created_at')
+
+# テンプレートに渡すためのフィルタ項目
     context = {
         'applications': applications,
+        'leave_types': Application.LeaveType.choices,
+        'statuses': Application.Status.choices,
+        # 過去10年分をフィルタ候補として渡す
+        'years': range(timezone.now().year, timezone.now().year - 10, -1),
+        'months': range(1, 13),
+        # 現在選択されているフィルタ値をテンプレートに戻す
+        'current_filters': {
+            'leave_type': leave_type,
+            'status': status,
+            'year': int(year) if year else None,
+            'month': int(month) if month else None,
+        }
     }
     return render(request, 'leaves/application_history.html', context)
 
