@@ -82,5 +82,20 @@
         </form>
     </div>
     {% endif %}
+
+    {# 差し戻しされた申請に対して表示 #}
+    {% if application.status == 'REMANDED' and application.applicant == user %}
+    <div class="card">
+        <h3>差し戻された申請の操作</h3>
+        <p>この申請は承認者から差し戻されています。内容を修正して再提出するか、申請自体を取り消すことができます。</p>
+        <div class="action-buttons">
+            <a href="{% url 'leaves:application_edit' pk=application.pk %}" class="button">編集して再提出</a>
+            <form method="post" action="{% url 'leaves:cancel_remanded' pk=application.pk %}" onsubmit="return confirm('本当にこの申請を取り消しますか？');">
+                {% csrf_token %}
+                <button type="submit" class="button-danger">この申請を取り消す</button>
+            </form>
+        </div>
+    </div>
+    {% endif %}
 </div>
 {% endblock %}

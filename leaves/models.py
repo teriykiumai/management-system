@@ -376,6 +376,7 @@ class ApprovalHistory(models.Model):
     """承認履歴"""
     class Action(models.TextChoices):
         APPLY = 'APPLY', '申請'
+        RESUBMIT = 'RESUBMIT', '再申請'
         APPROVE = 'APPROVE', '承認'
         REJECT = 'REJECT', '却下'
         REMAND = 'REMAND', '差し戻し'

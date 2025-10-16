@@ -13,7 +13,7 @@ from django.core.exceptions import ValidationError
 from .forms import ApplicationForm
 from .models import LeaveBalance, Application, Assignment, Department, Group, Team, Role
 from .services.fiscal_year_service import get_current_fiscal_year
-from .services.application_service import create_application, create_cancellation_request, AssignmentError
+from .services.application_service import create_application, create_cancellation_request, AssignmentError, resubmit_remanded_application, cancel_remanded_application
 from .services.approval_service import process_approval_action, InvalidActionError
 from .services.calendar_service import get_visible_applications_for_user
 
@@ -283,3 +283,43 @@ def leave_events_api(request):
         })
 
     return JsonResponse(events, safe=False)
+
+@login_required
+def application_edit_view(request, pk: int):
+    """差し戻された申請の編集・再提出ビュー"""
+    application = get_object_or_404(Application, pk=pk, applicant=request.user, status=Application.Status.REMANDED)
+    
+    if request.method == 'POST':
+        form = ApplicationForm(request.POST, user=request.user)
+        if form.is_valid():
+            try:
+                # 再提出サービスを呼び出し
+                resubmit_remanded_application(application, form.cleaned_data, request.POST)
+                messages.success(request, f"申請ID:{pk}を再提出しました。")
+                return redirect('leaves:application_history')
+            except ValidationError as e:
+                messages.error(request, e.message)
+    else:
+        # 既存の申請内容をフォームにセット
+        form = ApplicationForm(instance=application, user=request.user)
+
+    context = {
+        'form': form,
+        'is_edit_mode': True, # テンプレートに編集モードであることを伝える
+    }
+    return render(request, 'leaves/application_form.html', context)
+
+@login_required
+def cancel_remanded_view(request, pk: int):
+    """差し戻された申請の取り消し処理ビュー"""
+    if request.method != 'POST':
+        return redirect('leaves:application_history')
+
+    application = get_object_or_404(Application, pk=pk)
+    try:
+        cancel_remanded_application(request.user, application)
+        messages.success(request, f"申請ID:{pk}を取り消しました。")
+    except (PermissionError, ValueError) as e:
+        messages.error(request, str(e))
+    
+    return redirect('leaves:application_history')
