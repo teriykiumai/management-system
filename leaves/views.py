@@ -222,12 +222,28 @@ def calendar_view(request):
         primary_assignment = Assignment.objects.get(user=request.user, is_primary=True)
         view_scope = primary_assignment.role.view_scope
     except Assignment.DoesNotExist:
-        view_scope = Role.ViewScope.TEAM 
+        primary_assignment = None
+        view_scope = Role.ViewScope.TEAM # 所属がなければTEAM相当
 
+    # フィルタの選択肢を権限に応じて絞り込むロジック
+    departments = Department.objects.none()
+    groups = Group.objects.none()
+    teams = Team.objects.none()
+
+    if view_scope == Role.ViewScope.ALL:
+        departments = Department.objects.all()
+        groups = Group.objects.all()
+        teams = Team.objects.all()
+    elif view_scope == Role.ViewScope.DEPARTMENT and primary_assignment:
+        groups = Group.objects.filter(department=primary_assignment.department)
+        teams = Team.objects.filter(group__department=primary_assignment.department)
+    elif view_scope == Role.ViewScope.GROUP and primary_assignment:
+        teams = Team.objects.filter(group=primary_assignment.group)
+    
     context = {
-        'departments': Department.objects.all(),
-        'groups': Group.objects.all(),
-        'teams': Team.objects.all(),
+        'departments': departments,
+        'groups': groups,
+        'teams': teams,
         'leave_types': Application.LeaveType.choices,
         'view_scope': view_scope,
     }
@@ -240,10 +256,11 @@ def leave_events_api(request):
     group_id = request.GET.get('group')
     team_id = request.GET.get('team')
     leave_type = request.GET.get('leave_type')
+    only_me = request.GET.get('only_me') == 'true'
 
-    # ▼ 修正: サービスにパラメータを渡す ▼
+    # サービスにパラメータを渡す
     applications = get_visible_applications_for_user(
-        request.user, department_id, group_id, team_id, leave_type
+        request.user, only_me, department_id, group_id, team_id, leave_type
     )
 
     # 色分け用のカラーマップを定義
@@ -254,7 +271,6 @@ def leave_events_api(request):
         Application.LeaveType.TIME: "#9158F9",      # 時間休 
         Application.LeaveType.SPECIAL: '#333333',   # 無給休暇
     }
-
 
     events = []
     for app in applications:

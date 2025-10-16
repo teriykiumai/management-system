@@ -409,4 +409,11 @@ table tbody tr:hover {
 .balance-summary .balance-item .label {
   font-size: 0.9rem;
   color: rgb(0, 127.5, 255);
+}
+
+.filter-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
 }/*# sourceMappingURL=main.css.map */
