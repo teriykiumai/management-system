@@ -6,46 +6,39 @@
 {% block content %}
 <div class="container">
     <div class="card">
-        {% comment %} フィルタ作成 {% endcomment %}
+        {# フィルタ作成 #}
         <div class="calendar-filters">
             {# ▼ ALL権限の場合のみ部署フィルタを表示 ▼ #}
             {% if view_scope == 'ALL' %}
-            <select id="departmentFilter">
-                <option value="">全部署</option>
-                {% for dep in departments %}
-                <option value="{{ dep.pk }}">{{ dep.department_name }}</option>
-                {% endfor %}
-            </select>
+                <select id="departmentFilter">
+                    <option value="">全部署</option>
+                    {% for dep in departments %}<option value="{{ dep.pk }}">{{ dep.department_name }}</option>{% endfor %}
+                </select>
             {% endif %}
 
-            {# ▼ ALLまたはDEPARTMENT権限の場合にグループフィルタを表示 ▼ #}
+            {# ▼ ALL または DEPARTMENT 権限の場合にグループフィルタを表示 ▼ #}
             {% if view_scope == 'ALL' or view_scope == 'DEPARTMENT' %}
-            <select id="groupFilter">
-                <option value="">全グループ</option>
-                {% for group in groups %}
-                <option value="{{ group.pk }}">{{ group.group_name }}</option>
-                {% endfor %}
-            </select>
+                <select id="groupFilter">
+                    <option value="">全グループ</option>
+                    {% for group in groups %}<option value="{{ group.pk }}" data-department-id="{{ group.department_id }}">{{ group.group_name }}</option>{% endfor %}
+                </select>
             {% endif %}
             
-            {# ▼ ALL, DEPARTMENT, GROUP権限の場合にチームフィルタを表示 ▼ #}
-            {% if view_scope == 'ALL' or view_scope == 'DEPARTMENT' or view_scope == 'GROUP' %}
-            <select id="teamFilter">
-                <option value="">全チーム</option>
-                {% for team in teams %}
-                <option value="{{ team.pk }}">{{ team.team_name }}</option>
-                {% endfor %}
-            </select>
+            {# ▼ TEAM 権限 "以外" の場合にチームフィルタを表示 (TEAM権限者は自分のチームしか見れないため不要) ▼ #}
+            {% if view_scope != 'TEAM' %}
+                <select id="teamFilter">
+                    <option value="">全チーム</option>
+                    {% for team in teams %}<option value="{{ team.pk }}" data-group-id="{{ team.group_id }}">{{ team.team_name }}</option>{% endfor %}
+                </select>
             {% endif %}
 
             <select id="leaveTypeFilter">
                 <option value="">全休暇種別</option>
-                {% for value, display in leave_types %}
-                <option value="{{ value }}">{{ display }}</option>
-                {% endfor %}
+                {% for value, display in leave_types %}<option value="{{ value }}">{{ display }}</option>{% endfor %}
             </select>
+            
+            <label class="filter-checkbox"><input type="checkbox" id="onlyMeFilter"> 自分のみ表示</label>
         </div>
-
         <div id='calendar'></div>
     </div>
 </div>

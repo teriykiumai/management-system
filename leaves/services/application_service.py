@@ -176,3 +176,88 @@ def create_cancellation_request(user: User, target_application: Application) -> 
     )
 
     return cancellation_app
+
+
+@transaction.atomic
+def resubmit_remanded_application(application: Application, form_data: dict, post_data: dict) -> Application:
+    """
+    差し戻された申請を編集し、再提出する.
+
+    Args:
+        application (Application): 差し戻された申請オブジェクト.
+        form_data (dict): 検証済みのフォームデータ.
+        post_data (dict): 時間休を含む生のPOSTデータ.
+    """
+    # 1. 差し戻しを行った承認者を探す
+    last_remand = ApprovalHistory.objects.filter(
+        application=application, action=ApprovalHistory.Action.REMAND
+    ).latest('timestamp')
+    remanding_approver = last_remand.approver
+
+    # 2. 申請内容を更新
+    application.leave_type = form_data['leave_type']
+    application.start_date = form_data['start_date']
+    application.end_date = form_data['end_date']
+    application.reason = form_data['reason']
+
+    # 3. 消費時間(分)を再計算
+    duration_minutes = 0
+    leave_type = application.leave_type
+
+    if leave_type == Application.LeaveType.TIME:
+        # 既存の時間休スロットを一度全て削除
+        application.time_leave_slots.all().delete()
+        
+        # 時間休のバリデーションを実行
+        validate_time_leave_request(application.applicant, post_data)
+        
+        # 時間を計算
+        time_slots_data = parse_time_slots(post_data)
+        total_minutes, processed_slots = calculate_time_leave_minutes(application.applicant, time_slots_data)
+        duration_minutes = total_minutes
+        
+        # スロットを保存
+        save_time_leave_slots(application, processed_slots)
+    # 半休
+    elif leave_type in [Application.LeaveType.AM_HALF, Application.LeaveType.PM_HALF]:
+        duration_minutes = MINUTES_PER_WORK_HALF_DAY
+    # 全休
+    elif leave_type == Application.LeaveType.PAID:
+        workdays = count_workdays(application.start_date, application.end_date)
+        duration_minutes = workdays * MINUTES_PER_WORK_DAY
+    
+    # ステータスと次の承認者を設定
+    application.status = Application.Status.APPLYING
+    application.current_approver = remanding_approver
+    application.save()
+
+    # 再申請の履歴を記録
+    ApprovalHistory.objects.create(
+        application=application,
+        approver=application.applicant,
+        action=ApprovalHistory.Action.RESUBMIT,
+        comment="編集して再申請"
+    )
+    # 総消費時間を登録
+    application.duration_minutes = duration_minutes
+
+    return application
+
+def cancel_remanded_application(user: User, application: Application): # pyright: ignore[reportInvalidTypeForm]
+    """
+    差し戻された申請を、申請者本人が取り消す.
+    """
+    if application.applicant != user:
+        raise PermissionError("自分の申請しか取り消せません。")
+    if application.status != Application.Status.REMANDED:
+        raise ValueError("差し戻された申請しか取り消せません。")
+
+    application.status = Application.Status.CANCELLED
+    application.save()
+
+    ApprovalHistory.objects.create(
+        application=application,
+        approver=user,
+        action=ApprovalHistory.Action.CANCEL,
+        comment="差し戻し後に申請者が取り消し"
+    )

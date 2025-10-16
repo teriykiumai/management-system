@@ -6,6 +6,37 @@
 <div class="container">
     <div class="card">
         <h3>申請履歴一覧</h3>
+        {# フィルタUI #}
+        <form method="get" class="history-filters">
+            <select name="leave_type">
+                <option value="">全休暇種別</option>
+                {% for value, display in leave_types %}
+                    <option value="{{ value }}" {% if current_filters.leave_type == value %}selected{% endif %}>{{ display }}</option>
+                {% endfor %}
+            </select>
+            <select name="status">
+                <option value="">全ステータス</option>
+                {% for value, display in statuses %}
+                    <option value="{{ value }}" {% if current_filters.status == value %}selected{% endif %}>{{ display }}</option>
+                {% endfor %}
+            </select>
+            <select name="year">
+                <option value="">年を選択</option>
+                {% for y in years %}
+                    <option value="{{ y }}" {% if current_filters.year == y %}selected{% endif %}>{{ y }}年</option>
+                {% endfor %}
+            </select>
+            <select name="month">
+                <option value="">月を選択</option>
+                {% for m in months %}
+                    <option value="{{ m }}" {% if current_filters.month == m %}selected{% endif %}>{{ m }}月</option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="button-small">絞り込み</button>
+            <a href="{% url 'leaves:application_history' %}" class="button-small">リセット</a>
+        </form>
+
+        {# 履歴表示 #}
         {% if applications %}
             <div class="table-container">
                 <table>

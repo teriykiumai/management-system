@@ -1,5 +1,6 @@
 from datetime import timedelta
 
+from django.utils import timezone
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import login, get_user_model, logout
@@ -12,7 +13,7 @@ from django.core.exceptions import ValidationError
 from .forms import ApplicationForm
 from .models import LeaveBalance, Application, Assignment, Department, Group, Team, Role
 from .services.fiscal_year_service import get_current_fiscal_year
-from .services.application_service import create_application, create_cancellation_request, AssignmentError
+from .services.application_service import create_application, create_cancellation_request, AssignmentError, resubmit_remanded_application, cancel_remanded_application
 from .services.approval_service import process_approval_action, InvalidActionError
 from .services.calendar_service import get_visible_applications_for_user
 
@@ -178,8 +179,39 @@ def application_history_view(request):
         application_type=Application.ApplicationType.CANCEL
     ).order_by('-created_at')
 
+    leave_type = request.GET.get('leave_type') or None
+    status = request.GET.get('status') or None
+    year = request.GET.get('year') or None
+    month = request.GET.get('month') or None
+
+    # フィルタ
+    if leave_type:
+        applications = applications.filter(leave_type=leave_type)
+    if status:
+        applications = applications.filter(status=status)
+    if year:
+        applications = applications.filter(start_date__year=year)
+    if month:
+        applications = applications.filter(start_date__month=month)
+
+    # フィルタを適用した結果を最終的に並び替える
+    applications = applications.order_by('-created_at')
+
+# テンプレートに渡すためのフィルタ項目
     context = {
         'applications': applications,
+        'leave_types': Application.LeaveType.choices,
+        'statuses': Application.Status.choices,
+        # 過去10年分をフィルタ候補として渡す
+        'years': range(timezone.now().year, timezone.now().year - 10, -1),
+        'months': range(1, 13),
+        # 現在選択されているフィルタ値をテンプレートに戻す
+        'current_filters': {
+            'leave_type': leave_type,
+            'status': status,
+            'year': int(year) if year else None,
+            'month': int(month) if month else None,
+        }
     }
     return render(request, 'leaves/application_history.html', context)
 
@@ -190,12 +222,28 @@ def calendar_view(request):
         primary_assignment = Assignment.objects.get(user=request.user, is_primary=True)
         view_scope = primary_assignment.role.view_scope
     except Assignment.DoesNotExist:
-        view_scope = Role.ViewScope.TEAM 
+        primary_assignment = None
+        view_scope = Role.ViewScope.TEAM # 所属がなければTEAM相当
 
+    # フィルタの選択肢を権限に応じて絞り込むロジック
+    departments = Department.objects.none()
+    groups = Group.objects.none()
+    teams = Team.objects.none()
+
+    if view_scope == Role.ViewScope.ALL:
+        departments = Department.objects.all()
+        groups = Group.objects.all()
+        teams = Team.objects.all()
+    elif view_scope == Role.ViewScope.DEPARTMENT and primary_assignment:
+        groups = Group.objects.filter(department=primary_assignment.department)
+        teams = Team.objects.filter(group__department=primary_assignment.department)
+    elif view_scope == Role.ViewScope.GROUP and primary_assignment:
+        teams = Team.objects.filter(group=primary_assignment.group)
+    
     context = {
-        'departments': Department.objects.all(),
-        'groups': Group.objects.all(),
-        'teams': Team.objects.all(),
+        'departments': departments,
+        'groups': groups,
+        'teams': teams,
         'leave_types': Application.LeaveType.choices,
         'view_scope': view_scope,
     }
@@ -208,10 +256,11 @@ def leave_events_api(request):
     group_id = request.GET.get('group')
     team_id = request.GET.get('team')
     leave_type = request.GET.get('leave_type')
+    only_me = request.GET.get('only_me') == 'true'
 
-    # ▼ 修正: サービスにパラメータを渡す ▼
+    # サービスにパラメータを渡す
     applications = get_visible_applications_for_user(
-        request.user, department_id, group_id, team_id, leave_type
+        request.user, only_me, department_id, group_id, team_id, leave_type
     )
 
     # 色分け用のカラーマップを定義
@@ -222,7 +271,6 @@ def leave_events_api(request):
         Application.LeaveType.TIME: "#9158F9",      # 時間休 
         Application.LeaveType.SPECIAL: '#333333',   # 無給休暇
     }
-
 
     events = []
     for app in applications:
@@ -235,3 +283,43 @@ def leave_events_api(request):
         })
 
     return JsonResponse(events, safe=False)
+
+@login_required
+def application_edit_view(request, pk: int):
+    """差し戻された申請の編集・再提出ビュー"""
+    application = get_object_or_404(Application, pk=pk, applicant=request.user, status=Application.Status.REMANDED)
+    
+    if request.method == 'POST':
+        form = ApplicationForm(request.POST, user=request.user)
+        if form.is_valid():
+            try:
+                # 再提出サービスを呼び出し
+                resubmit_remanded_application(application, form.cleaned_data, request.POST)
+                messages.success(request, f"申請ID:{pk}を再提出しました。")
+                return redirect('leaves:application_history')
+            except ValidationError as e:
+                messages.error(request, e.message)
+    else:
+        # 既存の申請内容をフォームにセット
+        form = ApplicationForm(instance=application, user=request.user)
+
+    context = {
+        'form': form,
+        'is_edit_mode': True, # テンプレートに編集モードであることを伝える
+    }
+    return render(request, 'leaves/application_form.html', context)
+
+@login_required
+def cancel_remanded_view(request, pk: int):
+    """差し戻された申請の取り消し処理ビュー"""
+    if request.method != 'POST':
+        return redirect('leaves:application_history')
+
+    application = get_object_or_404(Application, pk=pk)
+    try:
+        cancel_remanded_application(request.user, application)
+        messages.success(request, f"申請ID:{pk}を取り消しました。")
+    except (PermissionError, ValueError) as e:
+        messages.error(request, str(e))
+    
+    return redirect('leaves:application_history')

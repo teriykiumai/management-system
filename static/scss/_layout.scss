@@ -87,3 +87,20 @@ footer {
         border: 1px solid $border-color;
     }
 }
+
+.history-filters {
+    display: flex;
+    flex-wrap: wrap; // 画面幅が狭い場合は折り返す
+    gap: 1rem;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    background-color: lighten($background-color, 3%);
+    border-radius: $border-radius;
+    border: 1px solid $border-color;
+
+    select {
+        padding: 0.5rem;
+        border-radius: $border-radius;
+        border: 1px solid $border-color;
+    }
+}

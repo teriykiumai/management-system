@@ -1,0 +1,6 @@
+.filter-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    white-space: nowrap; // 折り返しを防ぐ
+}

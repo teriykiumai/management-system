@@ -105,6 +105,22 @@ footer {
   border: 1px solid #e0e6ed;
 }
 
+.history-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  background-color: rgb(254.51875, 254.65, 254.78125);
+  border-radius: 4px;
+  border: 1px solid #e0e6ed;
+}
+.history-filters select {
+  padding: 0.5rem;
+  border-radius: 4px;
+  border: 1px solid #e0e6ed;
+}
+
 .button-small, .remove-slot-btn, .button-danger, button, .button {
   display: inline-block;
   border: 1px solid transparent;
@@ -393,4 +409,11 @@ table tbody tr:hover {
 .balance-summary .balance-item .label {
   font-size: 0.9rem;
   color: rgb(0, 127.5, 255);
+}
+
+.filter-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
 }/*# sourceMappingURL=main.css.map */

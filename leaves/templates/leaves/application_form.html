@@ -6,16 +6,16 @@
 {% block content %}
 <div class="container">
     <div class="card">
-        <h3>休暇申請フォーム</h3>
+        <h3>{% if is_edit_mode %}申請の編集・再提出{% else %}休暇申請フォーム{% endif %}</h3>
         <form method="post" id="applicationForm">
             {% csrf_token %}
             {# エラー表示箇所 #}  
             {% if form.non_field_errors %}
-            <div class="form-errors">
-                {% for error in form.non_field_errors %}
-                    <p>{{ error }}</p>
-                {% endfor %}
-            </div>
+                <div class="form-errors">
+                    {% for error in form.non_field_errors %}
+                        <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
             {% endif %}
             
             {# 休暇種別 #}
@@ -50,7 +50,7 @@
                 {{ form.reason }}
             </p>
 
-            <button type="submit">申請する</button>
+            <button type="submit">{% if is_edit_mode %}内容を更新して再提出する{% else %}申請する{% endif %}</button>
         </form>
     </div>
 </div>
