@@ -33,6 +33,28 @@ document.addEventListener('DOMContentLoaded', function() {
             week: '週',
             listYear: '年間リスト',
         },
+
+        // 週表示の時間範囲を 07:00 - 21:00 に限定
+        slotMinTime: '07:00:00',
+        slotMaxTime: '21:00:00',
+
+        // 月表示でイベントが収まらない場合に「+n more」リンクを表示
+        dayMaxEvents: true,
+
+        dayCellDidMount: function(info) {
+            // getDay()は日曜日=0, 土曜日=6 を返す
+            const dayOfWeek = info.date.getDay();
+
+            // 土曜日
+            if (dayOfWeek === 6) {
+                info.el.style.backgroundColor = '#d2ebfdff';
+            }
+            // 日曜日 
+            if (dayOfWeek === 0) {
+                info.el.style.backgroundColor = '#ffd7daff';
+            }
+        },
+
         // --- イベントデータの取得 ---
         events: function(fetchInfo, successCallback, failureCallback) {
             const params = new URLSearchParams({

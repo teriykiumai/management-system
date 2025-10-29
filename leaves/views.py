@@ -11,7 +11,7 @@ from django.db.models import Count, Q
 from django.core.exceptions import ValidationError
 
 from .forms import ApplicationForm
-from .models import LeaveBalance, Application, Assignment, Department, Group, Team, Role
+from .models import LeaveBalance, Application, Assignment, Department, Group, Team, Role, Holiday
 from .services.fiscal_year_service import get_current_fiscal_year
 from .services.application_service import create_application, create_cancellation_request, AssignmentError, resubmit_remanded_application, cancel_remanded_application
 from .services.approval_service import process_approval_action, InvalidActionError
@@ -261,7 +261,7 @@ def leave_events_api(request):
     # サービスにパラメータを渡す
     applications = get_visible_applications_for_user(
         request.user, only_me, department_id, group_id, team_id, leave_type
-    )
+    ).prefetch_related('time_leave_slots')
 
     # 色分け用のカラーマップを定義
     color_map = {
@@ -274,13 +274,59 @@ def leave_events_api(request):
 
     events = []
     for app in applications:
-        events.append({
-            'title': f"{app.applicant.last_name} ({app.get_leave_type_display()})",
-            'start': app.start_date,
-            'end': app.end_date + timedelta(days=1),
-            'backgroundColor': color_map.get(app.leave_type, '#a0a0a0'),
-            'borderColor': color_map.get(app.leave_type, '#a0a0a0'),
-        })
+        color = color_map.get(app.leave_type, '#a0a0a0')
+        
+        if app.leave_type == Application.LeaveType.TIME:
+                # --- 1. 時間休の場合 ---
+                # 申請された各時間帯を、個別のイベントとして追加
+            for slot in app.time_leave_slots.all():
+                events.append({
+                    'title': f"{app.applicant.last_name} (時間休)",
+                    'start': f"{app.start_date.isoformat()}T{slot.start_time.isoformat()}",
+                    'end': f"{app.end_date.isoformat()}T{slot.end_time.isoformat()}",
+                    'backgroundColor': color,
+                    'borderColor': color,
+                })
+
+        elif app.leave_type == Application.LeaveType.AM_HALF:
+            # --- 2. 午前休の場合 ---
+            events.append({
+                'title': f"{app.applicant.last_name} (午前休)",
+                'start': f"{app.start_date.isoformat()}T08:30:00", 
+                'end': f"{app.start_date.isoformat()}T12:00:00",   
+                'backgroundColor': color,
+                'borderColor': color,
+            })
+        elif app.leave_type == Application.LeaveType.PM_HALF:
+            # --- 3. 午後休の場合 ---
+            events.append({
+                'title': f"{app.applicant.last_name} (午後休)",
+                'start': f"{app.start_date.isoformat()}T13:00:00",
+                'end': f"{app.start_date.isoformat()}T17:30:00",   
+                'backgroundColor': color,
+                'borderColor': color,
+            })
+        else:
+            # --- 4. それ以外（有給休暇など）の場合 ---
+            events.append({
+                'title': f"{app.applicant.last_name} ({app.get_leave_type_display()})",
+                'start': app.start_date,
+                'end': app.end_date + timedelta(days=1),
+                'backgroundColor': color,
+                'borderColor': color,
+                'allDay': True
+            })
+
+        # 祝日をカレンダーに表示
+        holidays = Holiday.objects.all()
+        for holiday in holidays:
+            events.append({
+                'title': holiday.description, # 祝日名を表示
+                'start': holiday.holiday_date,
+                'allDay': True,
+                'display': 'background', # 背景イベントとして表示
+                'backgroundColor': "#ffd7daff" 
+            })
 
     return JsonResponse(events, safe=False)
 

@@ -14,10 +14,6 @@
             <a class="navbar-brand" href="{% url 'home' %}">休暇申請システム</a>
             <div class="navbar-menu">
                 {% if user.is_authenticated %}
-                    <span class="navbar-item user-name">
-                        {{ user.last_name }} さん
-                    </span>
-                    
                     {# request.resolver_match.url_name で現在のURL名を取得し、'dashboard'と一致すれば active クラスを付与 #}
                     <a class="navbar-item {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" 
                         href="{% url 'leaves:dashboard' %}">

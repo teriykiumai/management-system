@@ -416,4 +416,15 @@ table tbody tr:hover {
   align-items: center;
   gap: 0.5rem;
   white-space: nowrap;
+}
+
+:root {
+  --fc-event-bg-font-size: 0.8em;
+  --fc-event-font-style: normal;
+}
+
+.fc-daygrid-day-bg-event .fc-event-title {
+  padding-top: 1.8em;
+  font-weight: bold;
+  color: rgb(255, 1, 26.4);
 }/*# sourceMappingURL=main.css.map */
