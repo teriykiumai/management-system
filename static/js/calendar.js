@@ -33,6 +33,14 @@ document.addEventListener('DOMContentLoaded', function() {
             week: '週',
             listYear: '年間リスト',
         },
+
+        // 週表示の時間範囲を 06:00 - 21:00 に限定
+        slotMinTime: '06:00:00',
+        slotMaxTime: '21:00:00',
+
+        // 月表示でイベントが収まらない場合に「+n more」リンクを表示
+        dayMaxEvents: true,
+
         // --- イベントデータの取得 ---
         events: function(fetchInfo, successCallback, failureCallback) {
             const params = new URLSearchParams({

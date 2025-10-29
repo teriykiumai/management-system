@@ -325,7 +325,7 @@ erDiagram
         bool is_primary "主務フラグ"
     }
     LeaveBalance {
-        int user_id PK, FK
+        int user_id PK FK
         int year PK
         int carried_over_minutes "前年持ち越し"
         int granted_minutes "今年度付与"
