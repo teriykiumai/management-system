@@ -2,7 +2,7 @@ from django.utils import timezone
 
 from leaves.models import Application, ApprovalHistory, User, LeaveBalance
 from .balance_service import consume_balance, refund_balance, BalanceUpdateError
-
+from .notification_service import notify_next_approver, notify_applicant_of_final_decision
 
 class InvalidActionError(Exception):
     pass
@@ -41,6 +41,8 @@ def process_approval_action(application: Application, approver: User, action: st
             # 次の承認者がいる場合
             next_approver_id = application.approval_route[current_approver_index + 1]
             application.current_approver_id = next_approver_id
+            # 次の承認者に通知
+            notify_next_approver(application)
         else:
             # 自分が最終承認者の場合
             application.current_approver = None
@@ -56,6 +58,8 @@ def process_approval_action(application: Application, approver: User, action: st
                     target_app.status = Application.Status.CANCELLED
                     target_app.save()
                     refund_balance(target_app)
+                # 最終結果を申請者に通知
+                notify_applicant_of_final_decision(application)
             except BalanceUpdateError as e:
                 raise InvalidActionError(str(e))
     

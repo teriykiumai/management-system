@@ -18,6 +18,7 @@ from .time_leave_service import (
 from .fiscal_year_service import get_fiscal_year_for_date
 from .workday_service import count_workdays
 from .balance_service import validate_sufficient_balance
+from .notification_service import notify_next_approver
 
 User = get_user_model()
 
@@ -120,6 +121,10 @@ def create_application(applicant: User, form_data: dict, post_data: dict) -> App
         action=ApprovalHistory.Action.APPLY,
         comment="新規申請"
     )
+
+    # 次の承認者に通知をする
+    notify_next_approver(application)
+
     return application
 
 
@@ -176,7 +181,6 @@ def create_cancellation_request(user: User, target_application: Application) -> 
         action=ApprovalHistory.Action.APPLY,
         comment="取消申請"
     )
-
     return cancellation_app
 
 
@@ -242,6 +246,9 @@ def resubmit_remanded_application(application: Application, form_data: dict, pos
     )
     # 総消費時間を登録
     application.duration_minutes = duration_minutes
+
+    # 差し戻しを行った承認者（＝次の承認者）に通知を送信
+    notify_next_approver(application)
 
     return application
 
