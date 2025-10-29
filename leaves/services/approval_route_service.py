@@ -78,11 +78,16 @@ def generate_approval_route(applicant_assignment: Assignment) -> List[User]:
                 if approver_role and approver_role.is_approval_endpoint:
                     break
 
+    # 2. Assignmentに指定された直属の上長(manager)を追加
+    if applicant_assignment.manager:
+        manager = applicant_assignment.manager
+        if manager and manager != applicant_assignment.user:
+            # 申請者自身でなく、まだリストにいなければ追加
+            unique_approvers.setdefault(manager.pk, manager)
 
-    # 2. 固定の最終承認者を追加
+    # 3. 固定の最終承認者を追加
     for final_approver in _find_final_approvers():
         if final_approver and final_approver != applicant_assignment.user:
             unique_approvers[final_approver.pk] = final_approver
-
 
     return list(unique_approvers.values())
