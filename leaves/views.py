@@ -11,7 +11,7 @@ from django.db.models import Count, Q
 from django.core.exceptions import ValidationError
 
 from .forms import ApplicationForm
-from .models import LeaveBalance, Application, Assignment, Department, Group, Team, Role
+from .models import LeaveBalance, Application, Assignment, Department, Group, Team, Role, Holiday
 from .services.fiscal_year_service import get_current_fiscal_year
 from .services.application_service import create_application, create_cancellation_request, AssignmentError, resubmit_remanded_application, cancel_remanded_application
 from .services.approval_service import process_approval_action, InvalidActionError
@@ -316,7 +316,18 @@ def leave_events_api(request):
                 'borderColor': color,
                 'allDay': True
             })
-            
+
+        # 祝日をカレンダーに表示
+        holidays = Holiday.objects.all()
+        for holiday in holidays:
+            events.append({
+                'title': holiday.description, # 祝日名を表示
+                'start': holiday.holiday_date,
+                'allDay': True,
+                'display': 'background', # 背景イベントとして表示
+                'backgroundColor': "#ffd7daff" 
+            })
+
     return JsonResponse(events, safe=False)
 
 @login_required

@@ -1,0 +1,15 @@
+// FullCalendarの見た目を部分的に調整するためのファイル
+@import 'variables';
+
+// :rootセレクタで、FullCalendarが使用するCSS変数の値を上書きする
+:root {
+    --fc-event-bg-font-size: 0.8em;
+    --fc-event-font-style: normal;
+}
+
+// 祝日名の位置と色など、変数で変更できない部分を調整
+.fc-daygrid-day-bg-event .fc-event-title {
+    padding-top: 1.8em;     
+    font-weight: bold;       // 文字を太く
+    color: darken(#ffcdd2, 40%); // 背景より濃い赤色に
+}
