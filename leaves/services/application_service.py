@@ -1,3 +1,5 @@
+from datetime import date
+
 from django.db import transaction
 from django.core.exceptions import ValidationError
 from django.contrib.auth import get_user_model
@@ -46,7 +48,7 @@ def _prepare_application_data(applicant: User, form_data: Dict, post_data: Dict)
     except Assignment.DoesNotExist:
         raise AssignmentError('ユーザーの主務の所属情報が見つかりません。')
 
-    approval_route_users = generate_approval_route(primary_assignment)
+    approval_route_users = generate_approval_route(primary_assignment, date.today())
     if not approval_route_users:
         raise AssignmentError('承認ルートを生成できませんでした。管理者に連絡してください。')
     
