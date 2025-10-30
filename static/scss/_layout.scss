@@ -68,7 +68,7 @@ main {
 footer {
     text-align: center;
     padding: ($spacing-unit * 2) 0;
-    color: lighten($text-color, 40%); // 少し薄い文字色に
+    // color: lighten($text-color, 40%); // 少し薄い文字色に
     font-size: 0.9rem;
     border-top: 1px solid $border-color;
     margin-top: $spacing-unit * 2;

@@ -8,8 +8,10 @@
 }
 
 // 祝日名の位置と色など、変数で変更できない部分を調整
-.fc-daygrid-day-bg-event .fc-event-title {
-    padding-top: 1.8em;     
-    font-weight: bold;       // 文字を太く
-    color: darken(#ffcdd2, 40%); // 背景より濃い赤色に
+.fc .fc-bg-event .fc-event-title {
+    padding-top: 0.25em;
+    font-size: 0.65em !important;
+    font-weight: bold;
+    color: darken(#ffcdd2, 40%);
+    font-style: normal;
 }

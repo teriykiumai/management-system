@@ -19,8 +19,8 @@
 }
 
 // 通常のボタン (メインカラー)
-button, .button {
-    @extend %button-base; // 基本スタイルを継承
+.button {
+    @extend %button-base;
     padding: 0.6rem 1.2rem;
     font-size: $base-font-size;
     background-color: $primary-color;
@@ -43,5 +43,29 @@ button, .button {
     &:hover {
         background-color: darken($alert-color, 15%);
         border-color: darken($alert-color, 15%);
+    }
+}
+
+// 小さめのボタン (詳細を見る、追加・削除ボタン用)
+.button-small, .remove-slot-btn {
+    @extend %button-base; // 基本スタイルを継承
+    padding: 0.4rem 0.8rem;
+    font-size: 0.9rem;
+    background-color: $check-color; 
+    border-color: darken($check-color, 50%);
+
+    &:hover {
+        background-color: darken($check-color, 8%);
+        border-color: darken($check-color, 8%);
+    }
+}
+
+// 削除ボタン (赤色で危険な操作であることを示す)
+.remove-slot-btn {
+    background-color: $alert-color;
+    border-color: $alert-color;
+    &:hover {
+        background-color: darken($alert-color, 8%);
+        border-color: darken($alert-color, 8%);
     }
 }
