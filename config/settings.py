@@ -136,3 +136,19 @@ LOGIN_URL = 'dev_login' # 開発中はdev_loginをログインページとする
 LOGIN_REDIRECT_URL = 'leaves:dashboard' 
 # ログアウト成功後のデフォルトの遷移先
 # LOGOUT_REDIRECT_URL = 'leaves:dashboard'
+
+# --- メール設定 ---
+if DEBUG:
+    # 開発環境
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+else:
+    # 本番環境用の設定
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+    EMAIL_HOST = 'your-smtp-server.com'
+    EMAIL_PORT = 587
+    EMAIL_HOST_USER = ''
+    EMAIL_HOST_PASSWORD = ''
+    EMAIL_USE_TLS = True
+
+# メール送信のデフォルト"From"アドレス
+DEFAULT_FROM_EMAIL = 'noreply@example.com'
