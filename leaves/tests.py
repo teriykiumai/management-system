@@ -1,3 +1,5 @@
+from datetime import date
+
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 from leaves.models import Department, Group, Team, Role, Assignment
@@ -41,7 +43,7 @@ class ApprovalRouteServiceTest(TestCase):
         Assignment.objects.create(user=final_approver, department=self.dep_ops, role=self.role_final)
 
         # Act (実行): 承認ルート生成サービスを呼び出す
-        approval_route = generate_approval_route(applicant_assignment)
+        approval_route = generate_approval_route(applicant_assignment, date.today())
 
         # Assert (検証): 結果が期待通りかチェック
         self.assertEqual(len(approval_route), 3) # 承認者が3人いるか
