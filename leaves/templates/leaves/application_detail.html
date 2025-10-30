@@ -57,7 +57,7 @@
     {% if is_current_approver %}
     <div class="card">
         <h3>アクション</h3>
-        <form method="post" class="action-form">
+        <form method="post" class="action-form" data-confirm="操作を実行します。よろしいですか？">
             {% csrf_token %}
             <div>
                 <label for="comment">コメント（差し戻し・却下の場合は必須）:</label>
@@ -76,7 +76,7 @@
     <div class="card">
         <h3>取消申請</h3>
         <p>この承認済みの休暇申請を取り消しますか？<br><small>（この申請は、再度通常の承認フローを経て承認される必要があります）</small></p>
-        <form method="post" action="{% url 'leaves:request_cancellation' pk=application.pk %}">
+        <form method="post" action="{% url 'leaves:request_cancellation' pk=application.pk %}" data-confirm="この休暇の取消を申請します。よろしいですか？">
             {% csrf_token %}
             <button type="submit" class="button-danger">取消を申請する</button>
         </form>
@@ -90,7 +90,8 @@
         <p>この申請は承認者から差し戻されています。内容を修正して再提出するか、申請自体を取り消すことができます。</p>
         <div class="action-buttons">
             <a href="{% url 'leaves:application_edit' pk=application.pk %}" class="button">編集して再提出</a>
-            <form method="post" action="{% url 'leaves:cancel_remanded' pk=application.pk %}" onsubmit="return confirm('本当にこの申請を取り消しますか？');">
+            <form method="post" action="{% url 'leaves:cancel_remanded' pk=application.pk %}"
+                onsubmit="return confirm('本当にこの申請を取り消しますか？');" data-confirm="この差し戻された申請を完全に取り消します。よろしいですか？">
                 {% csrf_token %}
                 <button type="submit" class="button-danger">この申請を取り消す</button>
             </form>

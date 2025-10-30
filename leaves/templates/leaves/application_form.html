@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static %} {# staticタグを使えるようにloadしておく #}
+{% load static %}
 
 {% block title %}休暇申請{% endblock %}
 
@@ -7,7 +7,7 @@
 <div class="container">
     <div class="card">
         <h3>{% if is_edit_mode %}申請の編集・再提出{% else %}休暇申請フォーム{% endif %}</h3>
-        <form method="post" id="applicationForm">
+        <form method="post" id="applicationForm" data-confirm="この内容で申請します。よろしいですか？">
             {% csrf_token %}
             {# エラー表示箇所 #}  
             {% if form.non_field_errors %}
