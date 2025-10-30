@@ -86,7 +86,6 @@ main {
 footer {
   text-align: center;
   padding: 2rem 0;
-  color: #3399ff;
   font-size: 0.9rem;
   border-top: 1px solid #e0e6ed;
   margin-top: 2rem;
@@ -121,7 +120,7 @@ footer {
   border: 1px solid #e0e6ed;
 }
 
-.button-small, .remove-slot-btn, .button-danger, button, .button {
+.button-small, .remove-slot-btn, .button-danger, .button {
   display: inline-block;
   border: 1px solid transparent;
   border-radius: 4px;
@@ -132,19 +131,19 @@ footer {
   text-decoration: none;
   transition: background-color 0.2s, transform 0.1s;
 }
-.button-small:hover, .remove-slot-btn:hover, .button-danger:hover, button:hover, .button:hover {
+.button-small:hover, .remove-slot-btn:hover, .button-danger:hover, .button:hover {
   text-decoration: none;
   color: #fff;
   transform: translateY(-1px);
 }
 
-button, .button {
+.button {
   padding: 0.6rem 1.2rem;
   font-size: 16px;
   background-color: #336699;
   border-color: #336699;
 }
-button:hover, .button:hover {
+.button:hover {
   background-color: rgb(40.8, 81.6, 122.4);
   border-color: rgb(40.8, 81.6, 122.4);
 }
@@ -158,6 +157,26 @@ button:hover, .button:hover {
 .button-danger:hover {
   background-color: rgb(168.5307377049, 51.2581967213, 20.9692622951);
   border-color: rgb(168.5307377049, 51.2581967213, 20.9692622951);
+}
+
+.button-small, .remove-slot-btn {
+  padding: 0.4rem 0.8rem;
+  font-size: 0.9rem;
+  background-color: #639acd;
+  border-color: rgb(11.8932038835, 24.9757281553, 37.1067961165);
+}
+.button-small:hover, .remove-slot-btn:hover {
+  background-color: rgb(68.1029126214, 133.9961165049, 195.0970873786);
+  border-color: rgb(68.1029126214, 133.9961165049, 195.0970873786);
+}
+
+.remove-slot-btn {
+  background-color: #e44d26;
+  border-color: #e44d26;
+}
+.remove-slot-btn:hover {
+  background-color: rgb(200.2803278689, 60.9147540984, 24.9196721311);
+  border-color: rgb(200.2803278689, 60.9147540984, 24.9196721311);
 }
 
 .card {
@@ -322,26 +341,6 @@ table tbody tr:hover {
   font-weight: bold;
 }
 
-.button-small, .remove-slot-btn {
-  padding: 0.4rem 0.8rem;
-  font-size: 0.9rem;
-  background-color: #5a6268;
-  border-color: #5a6268;
-}
-.button-small:hover, .remove-slot-btn:hover {
-  background-color: rgb(71.0721649485, 77.3896907216, 82.1278350515);
-  border-color: rgb(71.0721649485, 77.3896907216, 82.1278350515);
-}
-
-.remove-slot-btn {
-  background-color: #e44d26;
-  border-color: #e44d26;
-}
-.remove-slot-btn:hover {
-  background-color: rgb(200.2803278689, 60.9147540984, 24.9196721311);
-  border-color: rgb(200.2803278689, 60.9147540984, 24.9196721311);
-}
-
 .detail-list {
   display: grid;
   grid-template-columns: 150px 1fr;
@@ -423,8 +422,10 @@ table tbody tr:hover {
   --fc-event-font-style: normal;
 }
 
-.fc-daygrid-day-bg-event .fc-event-title {
-  padding-top: 1.8em;
+.fc .fc-bg-event .fc-event-title {
+  padding-top: 0.25em;
+  font-size: 0.65em !important;
   font-weight: bold;
   color: rgb(255, 1, 26.4);
+  font-style: normal;
 }/*# sourceMappingURL=main.css.map */
